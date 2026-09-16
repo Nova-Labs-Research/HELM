@@ -1,0 +1,66 @@
+{
+  "amendment_id": "HELM-P1-AMEND-002",
+  "parent_preregistration": "HELM-P1-RAISE-SCOURGE",
+  "prior_amendment": "HELM-P1-AMEND-001",
+  "status": "PROPOSED",
+  "baseline": "v0.1.0-frozen-throne",
+  "scope": "same_family_review_limitation_episode_termination_seed_rationale",
+  "design": {
+    "fixed_roles": 6,
+    "task_families": 4,
+    "fixtures_per_family": 3,
+    "analytic_seeds_per_fixture": 20,
+    "episodes_per_provider": 240,
+    "primary_condition": "HELM_INTACT",
+    "purpose": ["DESCRIPTIVE", "BASELINE_ESTABLISHMENT", "BEHAVIORAL_CHARACTERIZATION"],
+    "formal_power_analysis": false
+  },
+  "review": {
+    "ai_pre_review": true,
+    "advisory_only": true,
+    "human_final_adjudication": true,
+    "same_family_configuration": "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5",
+    "same_family_limitation_disclosed": true,
+    "independent_ai_validation_claim": false,
+    "permitted": ["organize_evidence", "identify_message_spans", "propose_classification", "identify_ambiguity"],
+    "forbidden": ["change_raw_evidence", "override_governance", "remove_events", "final_classification", "convert_ambiguous_to_confirmed"]
+  },
+  "termination_rules": [
+    "TASK_COMPLETED",
+    "TASK_FAILED_FINAL",
+    "MAX_AGENT_TURNS_REACHED",
+    "MAX_MESSAGES_REACHED",
+    "EPISODE_TIMEOUT",
+    "CONTAINMENT_TERMINATED",
+    "UNRECOVERABLE_RUNTIME_FAILURE"
+  ],
+  "execution_envelope": {
+    "max_agent_turns": null,
+    "max_messages_per_episode": null,
+    "episode_timeout_seconds": null,
+    "limits_status": "PENDING_INSTRUMENTATION_ONLY_CALIBRATION",
+    "same_within_provider": true,
+    "retry_policy": "EXISTING_TECHNICAL_EXCLUSION_AND_SAME_SEED_RERUN_POLICY",
+    "context_management_rule": "TO_BE_FROZEN_BEFORE_ANALYTIC_EXECUTION"
+  },
+  "analysis_rules": {
+    "turn_limit_behavioral_data": true,
+    "message_limit_behavioral_data": true,
+    "counterfactual_behavior_inference": false,
+    "rare_event_zero_is_zero": false,
+    "phase1_sample_size_expansion_after_phase2": false,
+    "raw_counts_required": true,
+    "seed_fixture_variation_required": true,
+    "uncertainty_intervals_where_appropriate": true
+  },
+  "lock_requirements": {
+    "amendment_status": "LOCKED",
+    "n_seeds": 20,
+    "n_rationale": "DESCRIPTIVE_BASELINE_NOT_FORMAL_POWERED_TEST",
+    "ai_pre_review_same_family_limitation": "DISCLOSED",
+    "ai_pre_review_independent_validation": false,
+    "human_final_adjudication": "REQUIRED",
+    "termination_rules": "FROZEN",
+    "calibration_rationale": "REQUIRED_BEFORE_LIMITS_ARE_FILLED"
+  }
+}

@@ -31,6 +31,11 @@ status; later research goals are not implied complete by the Phase 0 scaffold.
 
 ## Phase 1 — Raise the Scourge
 
+- [x] Record preregistration Amendment 002: same-family review limitation, fixed
+      termination metadata, descriptive 20-seed rationale, and lock requirements.
+- [x] Add provider-neutral episode recorder; operational limits remain pending
+      instrumentation-only calibration.
+- [ ] Lock Amendment 002 and each provider `model_freeze.json` before analytic execution.
 - [ ] Select first local probabilistic model and implement an isolated adapter.
 - [ ] Six fixed roles; synthetic tasks; record every message.
 - [ ] No persistent memory, external tools, spawning, or dynamic role changes.

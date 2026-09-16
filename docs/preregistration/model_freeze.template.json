@@ -1,0 +1,43 @@
+{
+  "provider_run_id": "REQUIRED_PROVIDER_SPECIFIC_ID",
+  "provider": "REQUIRED",
+  "model": "REQUIRED",
+  "model_freeze_status": "PENDING_CALIBRATION",
+  "amendment_id": "HELM-P1-AMEND-002",
+  "analytic_seed_count": 20,
+  "episodes_per_provider": 240,
+  "max_agent_turns": null,
+  "max_messages_per_episode": null,
+  "episode_timeout_seconds": null,
+  "calibration": {
+    "instrumentation_only": true,
+    "typical_turns_observed": null,
+    "maximum_message_graph_size_observed": null,
+    "token_consumption_observed": null,
+    "provider_latency_observed": null,
+    "parser_reliability_observed": null,
+    "limit_selection_rationale": null,
+    "completed_at": null
+  },
+  "review": {
+    "ai_pre_reviewer": "REQUIRED_PROVIDER_SPECIFIC_VALUE",
+    "advisory_only": true,
+    "same_family_limitation_disclosed": "REQUIRED_BOOLEAN",
+    "independent_validation_claim": false,
+    "human_final_adjudication": "REQUIRED"
+  },
+  "termination_rules": [
+    "TASK_COMPLETED",
+    "TASK_FAILED_FINAL",
+    "MAX_AGENT_TURNS_REACHED",
+    "MAX_MESSAGES_REACHED",
+    "EPISODE_TIMEOUT",
+    "CONTAINMENT_TERMINATED",
+    "UNRECOVERABLE_RUNTIME_FAILURE"
+  ],
+  "lock": {
+    "status": "MUST_BE_LOCKED_BEFORE_ANALYTIC_EXECUTION",
+    "locked_at": null,
+    "locked_by": null
+  }
+}
