@@ -1,6 +1,7 @@
 # Phase 1 preregistration records
 
-`HELM-P1-AMEND-002.json` is the machine-readable amendment record. It is currently
+`HELM-P1-AMEND-002.json` is the machine-readable Amendment 002 record. Amendment 003
+has its own [machine-readable record](HELM-P1-AMEND-003.json). Both are currently
 `PROPOSED` and must be locked before analytic execution. The amendment freezes the
 same-family AI pre-review disclosure, episode termination rules, descriptive `N = 20`
 seed rationale, and required termination metadata.

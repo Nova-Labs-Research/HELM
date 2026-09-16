@@ -35,6 +35,10 @@ status; later research goals are not implied complete by the Phase 0 scaffold.
       termination metadata, descriptive 20-seed rationale, and lock requirements.
 - [x] Add provider-neutral episode recorder; operational limits remain pending
       instrumentation-only calibration.
+- [x] Record preregistration Amendment 003: independent behavior-definition artifact,
+      semantic hashing, normalized governance-only replay, and regeneration distinction.
+- [x] Add behavior-definition hash/version and replay-mode checks to the future lock gate.
+- [x] Add human-readable behavior definitions and explicit replay semantics documentation.
 - [ ] Lock Amendment 002 and each provider `model_freeze.json` before analytic execution.
 - [ ] Select first local probabilistic model and implement an isolated adapter.
 - [ ] Six fixed roles; synthetic tasks; record every message.

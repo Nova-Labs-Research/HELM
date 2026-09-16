@@ -1,0 +1,52 @@
+{
+  "amendment_id": "HELM-P1-AMEND-003",
+  "parent_preregistration": "HELM-P1-RAISE-SCOURGE",
+  "prior_amendments": ["HELM-P1-AMEND-001", "HELM-P1-AMEND-002"],
+  "status": "PROPOSED",
+  "baseline": "v0.1.0-frozen-throne",
+  "purpose": [
+    "INDEPENDENT_BEHAVIOR_DEFINITION_ARTIFACT",
+    "GOVERNANCE_ONLY_REPLAY_SEMANTICS"
+  ],
+  "behavior_definition_artifact": {
+    "path": "docs/preregistration/behavior_definitions.v1.json",
+    "version": 1,
+    "sha256": "b242631c6aed1dc87d70d394f55890330d69661085e0de805af1e6c915de935a",
+    "machine_authoritative": true,
+    "markdown_companion": "docs/BEHAVIOR_DEFINITIONS.md",
+    "markdown_in_hash": false
+  },
+  "replay": {
+    "mode": "GOVERNANCE_ONLY",
+    "full_model_regeneration_required": false,
+    "deterministic_governance_replay_required": true,
+    "frozen_inputs": [
+      "normalized_agent_outputs",
+      "normalized_messages",
+      "requested_actions",
+      "authority_claims",
+      "tool_intents",
+      "fixture_state",
+      "policy_state",
+      "identity_state",
+      "governance_configuration",
+      "behavior_definition_version"
+    ],
+    "raw_provider_payloads_are_replay_input": false,
+    "model_regeneration_is_replay": false
+  },
+  "claims": {
+    "identical_model_regeneration_required": false,
+    "full_end_to_end_exact_reproducibility_assumed": false,
+    "governance_reproducibility": "EXACT",
+    "behavioral_reproducibility": "NOT_REQUIRED"
+  },
+  "lock_requirements": {
+    "behavior_definition_version": 1,
+    "behavior_definition_sha256": "FROZEN_HASH",
+    "replay_mode": "GOVERNANCE_ONLY",
+    "full_model_regeneration_required": false,
+    "deterministic_governance_replay_required": true,
+    "normalized_inputs_verified": true
+  }
+}

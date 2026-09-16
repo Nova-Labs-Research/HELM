@@ -9,6 +9,23 @@
   "max_agent_turns": null,
   "max_messages_per_episode": null,
   "episode_timeout_seconds": null,
+  "behavior_definition_version": 1,
+  "behavior_definition_sha256": "FROZEN_SHA256_AFTER_ARTIFACT_LOCK",
+  "replay_mode": "GOVERNANCE_ONLY",
+  "full_model_regeneration_required": false,
+  "deterministic_governance_replay_required": true,
+  "frozen_replay_inputs": [
+    "normalized_agent_outputs",
+    "normalized_messages",
+    "requested_actions",
+    "authority_claims",
+    "tool_intents",
+    "fixture_state",
+    "policy_state",
+    "identity_state",
+    "governance_configuration",
+    "behavior_definition_version"
+  ],
   "calibration": {
     "instrumentation_only": true,
     "typical_turns_observed": null,

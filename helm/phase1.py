@@ -5,10 +5,35 @@ episode boundaries so a later provider adapter can apply one frozen envelope to 
 episodes in that provider run.
 """
 
+import hashlib
+import json
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from math import isfinite
+from pathlib import Path
 from typing import Any
+
+from helm.schema import canonical
+
+BEHAVIOR_DEFINITION_VERSION = 1
+DEFAULT_BEHAVIOR_DEFINITION_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "docs"
+    / "preregistration"
+    / "behavior_definitions.v1.json"
+)
+FROZEN_REPLAY_INPUTS = (
+    "normalized_agent_outputs",
+    "normalized_messages",
+    "requested_actions",
+    "authority_claims",
+    "tool_intents",
+    "fixture_state",
+    "policy_state",
+    "identity_state",
+    "governance_configuration",
+    "behavior_definition_version",
+)
 
 
 class TerminationReason(StrEnum):
@@ -38,6 +63,12 @@ class TechnicalExclusionStatus(StrEnum):
     EXCLUDED = "EXCLUDED"
 
 
+class ReplayMode(StrEnum):
+    GOVERNANCE_ONLY = "GOVERNANCE_ONLY"
+    MODEL_REGENERATION = "MODEL_REGENERATION"
+    END_TO_END_RERUN = "END_TO_END_RERUN"
+
+
 def _nonnegative_int(value: Any, name: str) -> int:
     if type(value) is not int or value < 0:
         raise ValueError(f"INVALID_{name.upper()}")
@@ -57,6 +88,133 @@ def _nonnegative_float(value: Any, name: str) -> float:
     if not isfinite(value) or value < 0:
         raise ValueError(f"INVALID_{name.upper()}")
     return value
+
+
+def _nonempty_text(value: Any, name: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"INVALID_{name.upper()}")
+    return value
+
+
+def validate_behavior_definitions(artifact: Any) -> dict[str, Any]:
+    """Validate the semantic artifact independently of Markdown presentation."""
+
+    required = {"behavior_definition_version", "definitions"}
+    if not isinstance(artifact, dict) or set(artifact) != required:
+        raise ValueError("INVALID_BEHAVIOR_DEFINITION_FIELDS")
+    if artifact["behavior_definition_version"] != BEHAVIOR_DEFINITION_VERSION:
+        raise ValueError("BEHAVIOR_DEFINITION_VERSION_MISMATCH")
+    definitions = artifact["definitions"]
+    if not isinstance(definitions, list) or len(definitions) != 7:
+        raise ValueError("INVALID_BEHAVIOR_DEFINITION_COUNT")
+    required_item = {
+        "id",
+        "version",
+        "definition",
+        "required_evidence",
+        "excluded_evidence",
+        "persistence_required",
+        "coordination_required",
+        "deterministic_preconditions",
+    }
+    expected_ids = {
+        "ROLE_DRIFT",
+        "AUTHORITY_CLAIM",
+        "POLICY_REINTERPRETATION",
+        "COALITION_LIKE",
+        "SUPERVISOR_SUBSTITUTION",
+        "BREAK_FREE_CANDIDATE",
+        "STRONG_BREAK_FREE_EVENT",
+    }
+    seen: set[str] = set()
+    for item in definitions:
+        if not isinstance(item, dict) or set(item) != required_item:
+            raise ValueError("INVALID_BEHAVIOR_DEFINITION_ITEM_FIELDS")
+        identifier = _nonempty_text(item["id"], "behavior_id")
+        if identifier in seen or identifier not in expected_ids:
+            raise ValueError("INVALID_BEHAVIOR_DEFINITION_ID")
+        seen.add(identifier)
+        if item["version"] != BEHAVIOR_DEFINITION_VERSION:
+            raise ValueError("BEHAVIOR_DEFINITION_ITEM_VERSION_MISMATCH")
+        _nonempty_text(item["definition"], "behavior_definition")
+        for field in ("required_evidence", "excluded_evidence", "deterministic_preconditions"):
+            values = item[field]
+            if (
+                not isinstance(values, list)
+                or not values
+                or any(not isinstance(value, str) or not value for value in values)
+            ):
+                raise ValueError(f"INVALID_{field.upper()}")
+        for field in ("persistence_required", "coordination_required"):
+            if type(item[field]) is not bool:
+                raise ValueError(f"INVALID_{field.upper()}")
+    if seen != expected_ids:
+        raise ValueError("MISSING_BEHAVIOR_DEFINITION")
+    return artifact
+
+
+def load_behavior_definitions(path: Path = DEFAULT_BEHAVIOR_DEFINITION_PATH) -> dict[str, Any]:
+    try:
+        artifact = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError("BEHAVIOR_DEFINITION_ARTIFACT_UNAVAILABLE") from error
+    return validate_behavior_definitions(artifact)
+
+
+def behavior_definition_sha256(artifact: dict[str, Any] | None = None) -> str:
+    """Hash canonical semantic JSON; Markdown and JSON formatting are excluded."""
+
+    validated = validate_behavior_definitions(
+        load_behavior_definitions() if artifact is None else artifact
+    )
+    return hashlib.sha256(canonical(validated).encode("utf-8")).hexdigest()
+
+
+def validate_frozen_replay_inputs(
+    inputs: Any, behavior_version: int = BEHAVIOR_DEFINITION_VERSION
+) -> None:
+    """Require the normalized artifacts consumed by governance-only replay."""
+
+    if not isinstance(inputs, dict) or not set(FROZEN_REPLAY_INPUTS) <= set(inputs):
+        raise ValueError("MISSING_NORMALIZED_REPLAY_INPUTS")
+    if inputs["behavior_definition_version"] != behavior_version:
+        raise ValueError("REPLAY_BEHAVIOR_DEFINITION_VERSION_MISMATCH")
+
+
+def validate_replay_configuration(
+    record: dict[str, Any], artifact: dict[str, Any] | None = None
+) -> None:
+    """Validate the replay semantics required by Amendment 003."""
+
+    expected_hash = behavior_definition_sha256(artifact)
+    if record.get("behavior_definition_version") != BEHAVIOR_DEFINITION_VERSION:
+        raise ValueError("BEHAVIOR_DEFINITION_VERSION_MISMATCH")
+    if record.get("behavior_definition_sha256") != expected_hash:
+        raise ValueError("BEHAVIOR_DEFINITION_HASH_MISMATCH")
+    if record.get("replay_mode") != ReplayMode.GOVERNANCE_ONLY:
+        raise ValueError("REPLAY_MUST_BE_GOVERNANCE_ONLY")
+    if record.get("full_model_regeneration_required") is not False:
+        raise ValueError("FULL_MODEL_REGENERATION_FORBIDDEN")
+    if record.get("deterministic_governance_replay_required") is not True:
+        raise ValueError("DETERMINISTIC_GOVERNANCE_REPLAY_REQUIRED")
+    inputs = record.get("frozen_replay_inputs")
+    if inputs != list(FROZEN_REPLAY_INPUTS):
+        raise ValueError("FROZEN_REPLAY_INPUTS_MISMATCH")
+
+
+def validate_replay_report_language(
+    report: str, mode: ReplayMode = ReplayMode.GOVERNANCE_ONLY
+) -> None:
+    """Prevent a governance-only report from claiming model regeneration."""
+
+    if not isinstance(report, str):
+        raise ValueError("INVALID_REPLAY_REPORT")
+    normalized = " ".join(report.upper().split())
+    if mode == ReplayMode.GOVERNANCE_ONLY and (
+        "FULL PHASE 1 EXPERIMENT REPLAYED EXACTLY" in normalized
+        or "IDENTICAL MODEL REGENERATION" in normalized
+    ):
+        raise ValueError("REPLAY_REPORT_OVERCLAIMS_MODEL_REGENERATION")
 
 
 @dataclass(frozen=True)
@@ -208,7 +366,13 @@ class EpisodeRecorder:
         return self._metadata
 
 
-def frozen_limits(record: dict[str, Any]) -> EpisodeLimits:
+def frozen_limits(
+    record: dict[str, Any],
+    artifact: dict[str, Any] | None = None,
+    *,
+    runtime_behavior_definition_version: int | None = None,
+    runtime_behavior_definition_hash: str | None = None,
+) -> EpisodeLimits:
     """Validate a provider freeze before an analytic adapter may start.
 
     Calibration records are intentionally separate from this gate. A pending
@@ -231,6 +395,12 @@ def frozen_limits(record: dict[str, Any]) -> EpisodeLimits:
         "review",
         "termination_rules",
         "lock",
+        "behavior_definition_version",
+        "behavior_definition_sha256",
+        "replay_mode",
+        "full_model_regeneration_required",
+        "deterministic_governance_replay_required",
+        "frozen_replay_inputs",
     }
     if not isinstance(record, dict) or set(record) != required:
         raise ValueError("INVALID_MODEL_FREEZE_FIELDS")
@@ -269,6 +439,13 @@ def frozen_limits(record: dict[str, Any]) -> EpisodeLimits:
     lock = record["lock"]
     if not isinstance(lock, dict) or lock.get("status") != "LOCKED":
         raise ValueError("LOCK_RECORD_NOT_LOCKED")
+    validate_replay_configuration(record, artifact)
+    if runtime_behavior_definition_version is not None:
+        if runtime_behavior_definition_version != record["behavior_definition_version"]:
+            raise ValueError("RUNTIME_BEHAVIOR_DEFINITION_VERSION_MISMATCH")
+    if runtime_behavior_definition_hash is not None:
+        if runtime_behavior_definition_hash != record["behavior_definition_sha256"]:
+            raise ValueError("RUNTIME_BEHAVIOR_DEFINITION_HASH_MISMATCH")
     return EpisodeLimits(
         record["max_agent_turns"],
         record["max_messages_per_episode"],

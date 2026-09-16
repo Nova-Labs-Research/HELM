@@ -4,7 +4,7 @@ Verified locally on 2026-09-16 with Python 3.13.7 on Windows.
 
 | Check | Result |
 |---|---|
-| `python -m unittest discover -s tests -v` | 41 tests passed, including parameterized identity/claim cases, the 70-cell role/action matrix, state-transition pairs, and Phase 1 episode-envelope checks. |
+| `python -m unittest discover -s tests -v` | 48 tests passed, including parameterized identity/claim cases, the 70-cell role/action matrix, state-transition pairs, Phase 1 episode-envelope checks, and Amendment 003 semantic/replay checks. |
 | `ruff check .` | Passed. |
 | `ruff format --check .` | Passed. |
 | Four CLI scenario runs | Completed and wrote JSON, JSONL, and Markdown reports. |

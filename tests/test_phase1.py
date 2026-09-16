@@ -1,6 +1,8 @@
 import unittest
 
 from helm.phase1 import (
+    BEHAVIOR_DEFINITION_VERSION,
+    FROZEN_REPLAY_INPUTS,
     ContainmentStatus,
     EpisodeLimits,
     EpisodeMetadata,
@@ -8,7 +10,13 @@ from helm.phase1 import (
     TaskCompletionStatus,
     TechnicalExclusionStatus,
     TerminationReason,
+    behavior_definition_sha256,
     frozen_limits,
+    load_behavior_definitions,
+    validate_behavior_definitions,
+    validate_frozen_replay_inputs,
+    validate_replay_configuration,
+    validate_replay_report_language,
 )
 
 
@@ -147,6 +155,7 @@ class EpisodeRecorderTests(unittest.TestCase):
         self.assertEqual(str(error.exception), "MODEL_FREEZE_NOT_LOCKED")
 
     def test_locked_freeze_requires_disclosure_and_calibration(self):
+        artifact_hash = behavior_definition_sha256()
         record = {
             "provider_run_id": "run-1",
             "provider": "synthetic",
@@ -158,6 +167,12 @@ class EpisodeRecorderTests(unittest.TestCase):
             "max_agent_turns": 10,
             "max_messages_per_episode": 20,
             "episode_timeout_seconds": 60.0,
+            "behavior_definition_version": BEHAVIOR_DEFINITION_VERSION,
+            "behavior_definition_sha256": artifact_hash,
+            "replay_mode": "GOVERNANCE_ONLY",
+            "full_model_regeneration_required": False,
+            "deterministic_governance_replay_required": True,
+            "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
             "calibration": {
                 "instrumentation_only": True,
                 "limit_selection_rationale": "Enough room for ordinary fixture completion.",
@@ -179,6 +194,124 @@ class EpisodeRecorderTests(unittest.TestCase):
         record["provider_run_id"] = "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5"
         with self.assertRaises(ValueError):
             frozen_limits(record)
+
+
+class SemanticReplayTests(unittest.TestCase):
+    def test_behavior_artifact_is_independently_versioned_and_hashed(self):
+        artifact = load_behavior_definitions()
+        self.assertEqual(artifact["behavior_definition_version"], 1)
+        self.assertEqual(len(artifact["definitions"]), 7)
+        self.assertEqual(len(behavior_definition_sha256(artifact)), 64)
+        self.assertEqual(behavior_definition_sha256(artifact), behavior_definition_sha256())
+        validate_behavior_definitions(artifact)
+
+    def test_behavior_artifact_mismatch_and_missing_file_fail(self):
+        artifact = load_behavior_definitions()
+        for mutation in (
+            {"behavior_definition_version": 2},
+            {"definitions": artifact["definitions"][:-1]},
+        ):
+            changed = {**artifact, **mutation}
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                validate_behavior_definitions(changed)
+        from pathlib import Path
+
+        with self.assertRaises(ValueError):
+            load_behavior_definitions(Path("does-not-exist/behavior_definitions.json"))
+
+    def test_normalized_replay_inputs_are_required(self):
+        valid = {name: [] for name in FROZEN_REPLAY_INPUTS}
+        valid["behavior_definition_version"] = BEHAVIOR_DEFINITION_VERSION
+        validate_frozen_replay_inputs(valid)
+        for missing in FROZEN_REPLAY_INPUTS:
+            changed = {**valid}
+            del changed[missing]
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                validate_frozen_replay_inputs(changed)
+        changed = {**valid, "behavior_definition_version": 2}
+        with self.assertRaises(ValueError):
+            validate_frozen_replay_inputs(changed)
+
+    def test_replay_configuration_rejects_regeneration_and_hash_changes(self):
+        base = {
+            "behavior_definition_version": 1,
+            "behavior_definition_sha256": behavior_definition_sha256(),
+            "replay_mode": "GOVERNANCE_ONLY",
+            "full_model_regeneration_required": False,
+            "deterministic_governance_replay_required": True,
+            "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
+        }
+        validate_replay_configuration(base)
+        for field, value in (
+            ("behavior_definition_version", 2),
+            ("behavior_definition_sha256", "0" * 64),
+            ("replay_mode", "MODEL_REGENERATION"),
+            ("full_model_regeneration_required", True),
+            ("deterministic_governance_replay_required", False),
+            ("frozen_replay_inputs", list(FROZEN_REPLAY_INPUTS[:-1])),
+        ):
+            changed = {**base, field: value}
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                validate_replay_configuration(changed)
+
+    def test_runtime_classifier_must_match_frozen_definition(self):
+        record = {
+            "provider_run_id": "run-1",
+            "provider": "synthetic",
+            "model": "test-model",
+            "model_freeze_status": "LOCKED",
+            "amendment_id": "HELM-P1-AMEND-002",
+            "analytic_seed_count": 20,
+            "episodes_per_provider": 240,
+            "max_agent_turns": 10,
+            "max_messages_per_episode": 20,
+            "episode_timeout_seconds": 60.0,
+            "behavior_definition_version": 1,
+            "behavior_definition_sha256": behavior_definition_sha256(),
+            "replay_mode": "GOVERNANCE_ONLY",
+            "full_model_regeneration_required": False,
+            "deterministic_governance_replay_required": True,
+            "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
+            "calibration": {
+                "instrumentation_only": True,
+                "limit_selection_rationale": "Enough room for ordinary fixture completion.",
+            },
+            "review": {
+                "advisory_only": True,
+                "independent_validation_claim": False,
+                "human_final_adjudication": "REQUIRED",
+                "same_family_limitation_disclosed": True,
+            },
+            "termination_rules": [reason.value for reason in TerminationReason],
+            "lock": {"status": "LOCKED"},
+        }
+        with self.assertRaises(ValueError):
+            frozen_limits(record, runtime_behavior_definition_version=2)
+        with self.assertRaises(ValueError):
+            frozen_limits(record, runtime_behavior_definition_hash="0" * 64)
+
+    def test_governance_only_report_cannot_claim_full_exact_replay(self):
+        validate_replay_report_language(
+            "Deterministic governance replay reproduced all decisions exactly."
+        )
+        with self.assertRaises(ValueError):
+            validate_replay_report_language("The full Phase 1 experiment replayed exactly.")
+        with self.assertRaises(ValueError):
+            validate_replay_report_language("Identical model regeneration is required.")
+
+    def test_cosmetic_documentation_is_outside_semantic_hash(self):
+        import json
+        from pathlib import Path
+
+        artifact = json.loads(
+            (
+                Path(__file__).parents[1] / "docs/preregistration/behavior_definitions.v1.json"
+            ).read_text()
+        )
+        before = behavior_definition_sha256(artifact)
+        markdown = (Path(__file__).parents[1] / "docs/BEHAVIOR_DEFINITIONS.md").read_text()
+        self.assertEqual(before, behavior_definition_sha256(artifact))
+        self.assertTrue(markdown)
 
 
 if __name__ == "__main__":

@@ -43,6 +43,23 @@
     "retry_policy": "EXISTING_TECHNICAL_EXCLUSION_AND_SAME_SEED_RERUN_POLICY",
     "context_management_rule": "TO_BE_FROZEN_BEFORE_ANALYTIC_EXECUTION"
   },
+  "behavior_definition_version": 1,
+  "behavior_definition_sha256": "b242631c6aed1dc87d70d394f55890330d69661085e0de805af1e6c915de935a",
+  "replay_mode": "GOVERNANCE_ONLY",
+  "full_model_regeneration_required": false,
+  "deterministic_governance_replay_required": true,
+  "frozen_replay_inputs": [
+    "normalized_agent_outputs",
+    "normalized_messages",
+    "requested_actions",
+    "authority_claims",
+    "tool_intents",
+    "fixture_state",
+    "policy_state",
+    "identity_state",
+    "governance_configuration",
+    "behavior_definition_version"
+  ],
   "analysis_rules": {
     "turn_limit_behavioral_data": true,
     "message_limit_behavioral_data": true,
