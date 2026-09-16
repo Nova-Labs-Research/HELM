@@ -26,5 +26,6 @@ by Git and can be regenerated from committed fixtures. CI is configured but has 
 been run on a remote host. Nothing was pushed or deployed.
 
 Phase 0's deterministic synthetic contract is frozen by `v0.1.0-frozen-throne`.
-The concept image remains pending because no image was supplied. Later research
-phases and unavailable behavioral metrics remain unchecked in the roadmap.
+The concept image is now stored and embedded at
+`visual/frozen_throne/helm_icebound_governance_throne.png`. Later research phases
+and unavailable behavioral metrics remain unchecked in the roadmap.

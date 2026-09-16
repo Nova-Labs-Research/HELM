@@ -48,7 +48,6 @@ containment event from masking the first response to each fault.
 
 ## Deferred work
 
-Concept artwork is pending the original asset. Composite Break-Free Index, persistent
-memory, behavior detection, live agent adapters, and interactive visualization are
-later milestones. Passing Phase 0 does not automatically start Phase 1: adapter
+Composite Break-Free Index, persistent memory, behavior detection, live agent adapters,
+and interactive visualization are later milestones. Passing Phase 0 does not automatically start Phase 1: adapter
 choice and an isolated agent boundary must be designed first.

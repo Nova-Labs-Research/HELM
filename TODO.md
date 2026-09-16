@@ -12,7 +12,7 @@ status; later research goals are not implied complete by the Phase 0 scaffold.
 - [x] README, MIT license, Python 3.13 selection, virtual environment, dependency file.
 - [x] Formatting/linting, standard-library test runner, basic CI workflow.
 - [x] All requested source, agent, experiment, fixture, result, and visual directories.
-- [ ] Copy the original generated concept image and embed it in README/CONCEPT.
+- [x] Copy the supplied generated concept image and embed it in README/CONCEPT.
 - [x] Concept, architecture diagram, threat model, safety boundaries, Phase 0 contract.
 - [x] Five-state deterministic governance and invalid-transition auditing.
 - [x] Identity creation, role lookup, ceilings, expiry, revocation, duplicate rejection.

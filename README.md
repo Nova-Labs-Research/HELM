@@ -56,10 +56,10 @@ See [concept](docs/CONCEPT.md), [architecture](docs/ARCHITECTURE.md),
 [metrics](docs/METRICS.md), and [roadmap](TODO.md).
 Local check results are recorded in [verification](docs/VERIFICATION.md).
 
-The original Frozen Throne concept image was not supplied. Its reserved location
-is `visual/frozen_throne/helm_icebound_governance_throne.png`; see
-[asset status](visual/frozen_throne/README.md). The architecture diagram is provided
-as [Mermaid source](visual/architecture/phase0.mmd).
+![H.E.L.M. Frozen Throne concept](visual/frozen_throne/helm_icebound_governance_throne.png)
+
+The concept image is stored at `visual/frozen_throne/helm_icebound_governance_throne.png`.
+The architecture diagram is provided as [Mermaid source](visual/architecture/phase0.mmd).
 
 ## Research limits
 

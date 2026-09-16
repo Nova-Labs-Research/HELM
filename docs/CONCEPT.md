@@ -26,10 +26,10 @@ is separate from PRAETOR and does not call or inherit authority from it.
 
 ## Concept artwork
 
-The requested generated image was absent from the supplied attachment. Place the
-original at `visual/frozen_throne/helm_icebound_governance_throne.png`, then embed it
-here and in the README. Until then, [asset status](../visual/frozen_throne/README.md)
-records this pending item without a broken image link.
+![H.E.L.M. Frozen Throne concept](../visual/frozen_throne/helm_icebound_governance_throne.png)
+
+The supplied concept image is preserved at
+`visual/frozen_throne/helm_icebound_governance_throne.png`.
 
 ## Behavioral classification
 

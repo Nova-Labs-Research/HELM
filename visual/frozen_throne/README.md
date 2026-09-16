@@ -1,10 +1,9 @@
-# Concept asset pending
+# Concept asset
 
-The supplied attachment contained text only. The original generated image is not
-available in this project.
+The supplied H.E.L.M. Frozen Throne concept image is stored here.
 
-Reserved filename: `helm_icebound_governance_throne.png`.
+Filename: `helm_icebound_governance_throne.png`.
 
-Once the original asset is supplied, copy it here and embed it in the repository
-README and `docs/CONCEPT.md`. Record its provenance and applicable rights. No
-replacement image or third-party Warcraft artwork has been substituted.
+The image is a generated project concept visual. It is embedded in the repository
+[README](../../README.md) and [concept document](../../docs/CONCEPT.md). No separate
+third-party Warcraft artwork has been substituted.
