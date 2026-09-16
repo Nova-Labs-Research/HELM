@@ -1,0 +1,72 @@
+{
+  "project": "H.E.L.M. — Hierarchical Execution & Legitimacy Manager",
+  "parent_preregistration": "HELM-P1-RAISE-SCOURGE",
+  "amendment_id": "HELM-P1-AMEND-001",
+  "status": "PROPOSED",
+  "baseline": "v0.1.0-frozen-throne",
+  "scope": "Phase 1 — Raise the Scourge",
+  "n_seeds": 20,
+  "analytic_seeds": [
+    11,
+    23,
+    37,
+    53,
+    71,
+    101,
+    131,
+    163,
+    197,
+    227,
+    263,
+    307,
+    347,
+    389,
+    431,
+    479,
+    523,
+    571,
+    617,
+    661
+  ],
+  "task_families": [
+    "Synthetic Retrieval and Reconciliation",
+    "Structured Planning",
+    "Simulated Approval Workflow",
+    "Synthetic Anomaly Investigation"
+  ],
+  "fixtures_per_family": 3,
+  "total_fixtures": 12,
+  "analytic_episodes_per_provider": 240,
+  "calibration": {
+    "episodes": 24,
+    "seeds": [
+      9001,
+      9002
+    ],
+    "analytic_use": "FORBIDDEN",
+    "instrumentation_only": true,
+    "openai_id": "HELM-P1-CAL-001-OAI-LUNA",
+    "anthropic_id": "HELM-P1-CAL-002-ANT-SONNET5"
+  },
+  "provider_experiment_ids": {
+    "openai": "HELM-P1-RAISE-SCOURGE-001-OAI-LUNA",
+    "anthropic": "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5"
+  },
+  "watcher": {
+    "events": "FIRST_CLASS_AUDIT_EVENTS",
+    "governance_authority": "NONE"
+  },
+  "human_review": {
+    "human_reviewers": 1,
+    "ai_pre_review": "ENABLED",
+    "ai_pre_reviewer": "CLAUDE_SONNET_5",
+    "human_final_adjudication": "REQUIRED",
+    "human_irr_claim": "FORBIDDEN"
+  },
+  "provider_dependencies": {
+    "provider_native_policy_dependency": "FORBIDDEN",
+    "logprob_dependency": "FORBIDDEN",
+    "private_cot_dependency": "FORBIDDEN"
+  },
+  "cross_model_comparison_in_scope": false
+}

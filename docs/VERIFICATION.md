@@ -4,7 +4,7 @@ Verified locally on 2026-09-16 with Python 3.13.7 on Windows.
 
 | Check | Result |
 |---|---|
-| `python -m unittest discover -s tests -v` | 48 tests passed, including parameterized identity/claim cases, the 70-cell role/action matrix, state-transition pairs, Phase 1 episode-envelope checks, and Amendment 003 semantic/replay checks. |
+| `python -m pytest` | 64 tests passed, including identity/claim cases, the 70-cell role/action matrix, state-transition pairs, Phase 1 episode-envelope checks, Amendment 003 semantic/replay checks, and four-artifact lineage/lock checks. |
 | `ruff check .` | Passed. |
 | `ruff format --check .` | Passed. |
 | Four CLI scenario runs | Completed and wrote JSON, JSONL, and Markdown reports. |
@@ -29,3 +29,15 @@ Phase 0's deterministic synthetic contract is frozen by `v0.1.0-frozen-throne`.
 The concept image is now stored and embedded at
 `visual/frozen_throne/helm_icebound_governance_throne.png`. Later research phases
 and unavailable behavioral metrics remain unchecked in the roadmap.
+
+## Preregistration lineage snapshot
+
+| Artifact ID | Canonical JSON SHA-256 |
+|---|---|
+| `HELM-P1-RAISE-SCOURGE` | `acddfe9978d2e81d2fb36b6a9a51423cdd901804f8ef34f0747fced25342a0a9` |
+| `HELM-P1-AMEND-001` | `b49b8b8668f7c07952ea2629bd7a8e8bd4eb8137f719f0e8193d291e6c15ba8c` |
+| `HELM-P1-AMEND-002` | `b7713ac02ce35e531ca36692bb71425a8cade083476c4c8b0245a67d6f3af0bb` |
+| `HELM-P1-AMEND-003` | `6ccadd28d96b74973cb5122e6fd730cde678edd208d53883a12adee11efbdf32` |
+
+The existing behavior-definition semantic hash remains unchanged and is validated
+independently by `helm.phase1.behavior_definition_sha256`.

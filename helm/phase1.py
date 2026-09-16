@@ -16,6 +16,12 @@ from typing import Any
 from helm.schema import canonical
 
 BEHAVIOR_DEFINITION_VERSION = 1
+AMENDMENT_CHAIN = (
+    "HELM-P1-AMEND-001",
+    "HELM-P1-AMEND-002",
+    "HELM-P1-AMEND-003",
+)
+LATEST_AMENDMENT_ID = AMENDMENT_CHAIN[-1]
 DEFAULT_BEHAVIOR_DEFINITION_PATH = (
     Path(__file__).resolve().parents[1]
     / "docs"
@@ -34,6 +40,18 @@ FROZEN_REPLAY_INPUTS = (
     "governance_configuration",
     "behavior_definition_version",
 )
+PREREGISTRATION_LINEAGE = (
+    ("HELM-P1-RAISE-SCOURGE", "docs/preregistration/HELM-P1-RAISE-SCOURGE.json"),
+    ("HELM-P1-AMEND-001", "docs/preregistration/HELM-P1-AMEND-001.json"),
+    ("HELM-P1-AMEND-002", "docs/preregistration/HELM-P1-AMEND-002.json"),
+    ("HELM-P1-AMEND-003", "docs/preregistration/HELM-P1-AMEND-003.json"),
+)
+EXPECTED_PREREGISTRATION_HASHES = {
+    "HELM-P1-RAISE-SCOURGE": "acddfe9978d2e81d2fb36b6a9a51423cdd901804f8ef34f0747fced25342a0a9",
+    "HELM-P1-AMEND-001": "b49b8b8668f7c07952ea2629bd7a8e8bd4eb8137f719f0e8193d291e6c15ba8c",
+    "HELM-P1-AMEND-002": "b7713ac02ce35e531ca36692bb71425a8cade083476c4c8b0245a67d6f3af0bb",
+    "HELM-P1-AMEND-003": "6ccadd28d96b74973cb5122e6fd730cde678edd208d53883a12adee11efbdf32",
+}
 
 
 class TerminationReason(StrEnum):
@@ -168,6 +186,126 @@ def behavior_definition_sha256(artifact: dict[str, Any] | None = None) -> str:
         load_behavior_definitions() if artifact is None else artifact
     )
     return hashlib.sha256(canonical(validated).encode("utf-8")).hexdigest()
+
+
+def canonical_json_sha256(path: Path) -> str:
+    """Hash a JSON artifact by canonical content, independent of whitespace."""
+
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError("PREREGISTRATION_ARTIFACT_MISSING") from error
+    return hashlib.sha256(canonical(value).encode("utf-8")).hexdigest()
+
+
+def _artifact_identifier(value: dict[str, Any]) -> str | None:
+    identifier = value.get("preregistration_id")
+    if identifier is None:
+        identifier = value.get("amendment_id")
+    return identifier if isinstance(identifier, str) else None
+
+
+def validate_preregistration_lineage(
+    lineage: Any | None = None,
+    *,
+    root: Path | None = None,
+) -> list[dict[str, str]]:
+    """Validate the four materialized preregistration artifacts and their chain."""
+
+    root = Path(__file__).resolve().parents[1] if root is None else Path(root)
+    actual: list[dict[str, str]] = []
+    documents: dict[str, dict[str, Any]] = {}
+    for expected_id, relative_path in PREREGISTRATION_LINEAGE:
+        path = root / relative_path
+        if not path.is_file():
+            raise ValueError("PREREGISTRATION_ARTIFACT_MISSING")
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise ValueError("PREREGISTRATION_ARTIFACT_MISSING") from error
+        identifier = _artifact_identifier(value)
+        if identifier != expected_id:
+            raise ValueError("PREREGISTRATION_ID_MISMATCH")
+        documents[expected_id] = value
+        actual.append({"id": expected_id, "sha256": canonical_json_sha256(path)})
+    original = documents["HELM-P1-RAISE-SCOURGE"]
+    amend_001 = documents["HELM-P1-AMEND-001"]
+    amend_002 = documents["HELM-P1-AMEND-002"]
+    amend_003 = documents["HELM-P1-AMEND-003"]
+    if any(
+        key in original for key in ("parent_preregistration", "prior_amendment", "prior_amendments")
+    ):
+        raise ValueError("PREREGISTRATION_PARENT_RELATIONSHIP_INVALID")
+    if amend_001.get("parent_preregistration") != "HELM-P1-RAISE-SCOURGE":
+        raise ValueError("PREREGISTRATION_PARENT_RELATIONSHIP_INVALID")
+    if (
+        amend_002.get("parent_preregistration") != "HELM-P1-RAISE-SCOURGE"
+        or amend_002.get("prior_amendment") != "HELM-P1-AMEND-001"
+    ):
+        raise ValueError("PREREGISTRATION_PARENT_RELATIONSHIP_INVALID")
+    if amend_003.get("parent_preregistration") != "HELM-P1-RAISE-SCOURGE" or amend_003.get(
+        "prior_amendments"
+    ) != ["HELM-P1-AMEND-001", "HELM-P1-AMEND-002"]:
+        raise ValueError("PREREGISTRATION_PARENT_RELATIONSHIP_INVALID")
+    for item in actual:
+        if item["sha256"] != EXPECTED_PREREGISTRATION_HASHES[item["id"]]:
+            raise ValueError("PREREGISTRATION_HASH_MISMATCH")
+    if lineage is None:
+        return actual
+    if not isinstance(lineage, list) or len(lineage) != len(PREREGISTRATION_LINEAGE):
+        raise ValueError("AMENDMENT_CHAIN_INCOMPLETE")
+    normalized: list[dict[str, str]] = []
+    for item in lineage:
+        if not isinstance(item, dict) or set(item) != {"id", "sha256"}:
+            raise ValueError("AMENDMENT_CHAIN_INCOMPLETE")
+        if not isinstance(item["id"], str) or not isinstance(item["sha256"], str):
+            raise ValueError("AMENDMENT_CHAIN_INCOMPLETE")
+        normalized.append({"id": item["id"], "sha256": item["sha256"]})
+    if [item["id"] for item in normalized] != [item["id"] for item in actual]:
+        raise ValueError("AMENDMENT_CHAIN_INCOMPLETE")
+    for expected, provided in zip(actual, normalized, strict=True):
+        if provided["sha256"] != expected["sha256"]:
+            raise ValueError("PREREGISTRATION_HASH_MISMATCH")
+    return actual
+
+
+def _document_is_locked(identifier: str, value: dict[str, Any]) -> bool:
+    """Read each document's own lock signal in the vocabulary it actually uses.
+
+    The original preregistration predates the amendment convention and already
+    carries a populated ``preregistration_lock_fields.PREREGISTRATION_STATUS``
+    (locked with Phase 0). Amendments use a top-level ``status`` that starts as
+    ``PROPOSED`` and must be explicitly edited to ``LOCKED`` before an analytic
+    run may reference it. Neither vocabulary is invented here; both already
+    exist in the materialized documents.
+    """
+
+    if identifier == "HELM-P1-RAISE-SCOURGE":
+        lock_fields = value.get("preregistration_lock_fields")
+        return (
+            isinstance(lock_fields, dict) and lock_fields.get("PREREGISTRATION_STATUS") == "LOCKED"
+        )
+    return value.get("status") == "LOCKED"
+
+
+def validate_preregistration_lock_status(root: Path | None = None) -> None:
+    """Require every lineage document to show itself as locked, not just correct.
+
+    This is independent of ``validate_preregistration_lineage``: a document can
+    be the exact, unaltered, hash-verified artifact and still be ``PROPOSED``.
+    Content correctness and lock status are separate invariants with separate
+    failure modes, so they get separate checks and separate error codes.
+    """
+
+    root = Path(__file__).resolve().parents[1] if root is None else Path(root)
+    for expected_id, relative_path in PREREGISTRATION_LINEAGE:
+        path = root / relative_path
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise ValueError("PREREGISTRATION_ARTIFACT_MISSING") from error
+        if not _document_is_locked(expected_id, value):
+            raise ValueError("PREREGISTRATION_ARTIFACT_NOT_LOCKED")
 
 
 def validate_frozen_replay_inputs(
@@ -372,6 +510,7 @@ def frozen_limits(
     *,
     runtime_behavior_definition_version: int | None = None,
     runtime_behavior_definition_hash: str | None = None,
+    preregistration_root: Path | None = None,
 ) -> EpisodeLimits:
     """Validate a provider freeze before an analytic adapter may start.
 
@@ -401,11 +540,17 @@ def frozen_limits(
         "full_model_regeneration_required",
         "deterministic_governance_replay_required",
         "frozen_replay_inputs",
+        "preregistration_lineage",
     }
-    if not isinstance(record, dict) or set(record) != required:
+    if not isinstance(record, dict) or not required <= set(record):
         raise ValueError("INVALID_MODEL_FREEZE_FIELDS")
-    if record["amendment_id"] != "HELM-P1-AMEND-002":
+    unexpected = set(record) - required
+    if unexpected != set() and unexpected != {"amendment_chain"}:
+        raise ValueError("INVALID_MODEL_FREEZE_FIELDS")
+    if record["amendment_id"] != LATEST_AMENDMENT_ID:
         raise ValueError("WRONG_AMENDMENT")
+    if "amendment_chain" in record and record["amendment_chain"] != list(AMENDMENT_CHAIN):
+        raise ValueError("AMENDMENT_CHAIN_INCOMPLETE")
     if record["model_freeze_status"] != "LOCKED":
         raise ValueError("MODEL_FREEZE_NOT_LOCKED")
     if record["analytic_seed_count"] != 20 or record["episodes_per_provider"] != 240:
@@ -439,6 +584,8 @@ def frozen_limits(
     lock = record["lock"]
     if not isinstance(lock, dict) or lock.get("status") != "LOCKED":
         raise ValueError("LOCK_RECORD_NOT_LOCKED")
+    validate_preregistration_lineage(record["preregistration_lineage"], root=preregistration_root)
+    validate_preregistration_lock_status(root=preregistration_root)
     validate_replay_configuration(record, artifact)
     if runtime_behavior_definition_version is not None:
         if runtime_behavior_definition_version != record["behavior_definition_version"]:

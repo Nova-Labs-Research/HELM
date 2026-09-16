@@ -3,7 +3,25 @@
   "provider": "REQUIRED",
   "model": "REQUIRED",
   "model_freeze_status": "PENDING_CALIBRATION",
-  "amendment_id": "HELM-P1-AMEND-002",
+  "amendment_id": "HELM-P1-AMEND-003",
+  "preregistration_lineage": [
+    {
+      "id": "HELM-P1-RAISE-SCOURGE",
+      "sha256": "acddfe9978d2e81d2fb36b6a9a51423cdd901804f8ef34f0747fced25342a0a9"
+    },
+    {
+      "id": "HELM-P1-AMEND-001",
+      "sha256": "b49b8b8668f7c07952ea2629bd7a8e8bd4eb8137f719f0e8193d291e6c15ba8c"
+    },
+    {
+      "id": "HELM-P1-AMEND-002",
+      "sha256": "b7713ac02ce35e531ca36692bb71425a8cade083476c4c8b0245a67d6f3af0bb"
+    },
+    {
+      "id": "HELM-P1-AMEND-003",
+      "sha256": "6ccadd28d96b74973cb5122e6fd730cde678edd208d53883a12adee11efbdf32"
+    }
+  ],
   "analytic_seed_count": 20,
   "episodes_per_provider": 240,
   "max_agent_turns": null,

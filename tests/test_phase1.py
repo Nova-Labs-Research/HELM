@@ -1,8 +1,13 @@
 import unittest
+from unittest import mock
 
 from helm.phase1 import (
+    AMENDMENT_CHAIN,
     BEHAVIOR_DEFINITION_VERSION,
+    EXPECTED_PREREGISTRATION_HASHES,
     FROZEN_REPLAY_INPUTS,
+    LATEST_AMENDMENT_ID,
+    PREREGISTRATION_LINEAGE,
     ContainmentStatus,
     EpisodeLimits,
     EpisodeMetadata,
@@ -18,6 +23,46 @@ from helm.phase1 import (
     validate_replay_configuration,
     validate_replay_report_language,
 )
+
+
+def _valid_freeze_record():
+    """A fresh, fully valid LOCKED model_freeze record for negative-test mutation."""
+
+    return {
+        "provider_run_id": "run-1",
+        "provider": "synthetic",
+        "model": "test-model",
+        "model_freeze_status": "LOCKED",
+        "amendment_id": LATEST_AMENDMENT_ID,
+        "amendment_chain": list(AMENDMENT_CHAIN),
+        "preregistration_lineage": [
+            {"id": identifier, "sha256": EXPECTED_PREREGISTRATION_HASHES[identifier]}
+            for identifier, _ in PREREGISTRATION_LINEAGE
+        ],
+        "analytic_seed_count": 20,
+        "episodes_per_provider": 240,
+        "max_agent_turns": 10,
+        "max_messages_per_episode": 20,
+        "episode_timeout_seconds": 60.0,
+        "behavior_definition_version": BEHAVIOR_DEFINITION_VERSION,
+        "behavior_definition_sha256": behavior_definition_sha256(),
+        "replay_mode": "GOVERNANCE_ONLY",
+        "full_model_regeneration_required": False,
+        "deterministic_governance_replay_required": True,
+        "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
+        "calibration": {
+            "instrumentation_only": True,
+            "limit_selection_rationale": "Enough room for ordinary fixture completion.",
+        },
+        "review": {
+            "advisory_only": True,
+            "independent_validation_claim": False,
+            "human_final_adjudication": "REQUIRED",
+            "same_family_limitation_disclosed": True,
+        },
+        "termination_rules": [reason.value for reason in TerminationReason],
+        "lock": {"status": "LOCKED"},
+    }
 
 
 class EpisodeRecorderTests(unittest.TestCase):
@@ -155,45 +200,76 @@ class EpisodeRecorderTests(unittest.TestCase):
         self.assertEqual(str(error.exception), "MODEL_FREEZE_NOT_LOCKED")
 
     def test_locked_freeze_requires_disclosure_and_calibration(self):
-        artifact_hash = behavior_definition_sha256()
-        record = {
-            "provider_run_id": "run-1",
-            "provider": "synthetic",
-            "model": "test-model",
-            "model_freeze_status": "LOCKED",
-            "amendment_id": "HELM-P1-AMEND-002",
-            "analytic_seed_count": 20,
-            "episodes_per_provider": 240,
-            "max_agent_turns": 10,
-            "max_messages_per_episode": 20,
-            "episode_timeout_seconds": 60.0,
-            "behavior_definition_version": BEHAVIOR_DEFINITION_VERSION,
-            "behavior_definition_sha256": artifact_hash,
-            "replay_mode": "GOVERNANCE_ONLY",
-            "full_model_regeneration_required": False,
-            "deterministic_governance_replay_required": True,
-            "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
-            "calibration": {
-                "instrumentation_only": True,
-                "limit_selection_rationale": "Enough room for ordinary fixture completion.",
-            },
-            "review": {
-                "advisory_only": True,
-                "independent_validation_claim": False,
-                "human_final_adjudication": "REQUIRED",
-                "same_family_limitation_disclosed": True,
-            },
-            "termination_rules": [reason.value for reason in TerminationReason],
-            "lock": {"status": "LOCKED"},
-        }
-        limits = frozen_limits(record)
-        self.assertEqual(limits.max_agent_turns, 10)
-        record["review"]["same_family_limitation_disclosed"] = False
-        record["provider_run_id"] = "HELM-P1-OTHER-PROVIDER"
-        self.assertEqual(frozen_limits(record).max_agent_turns, 10)
-        record["provider_run_id"] = "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5"
-        with self.assertRaises(ValueError):
+        # Amendments 001-003 remain PROPOSED on disk by design (a real analytic
+        # lock is correctly blocked right now). This test is about the
+        # calibration/review/same-family invariants, not lineage lock status,
+        # which has its own dedicated coverage in test_lineage.py.
+        with mock.patch("helm.phase1.validate_preregistration_lock_status"):
+            artifact_hash = behavior_definition_sha256()
+            record = {
+                "provider_run_id": "run-1",
+                "provider": "synthetic",
+                "model": "test-model",
+                "model_freeze_status": "LOCKED",
+                "amendment_id": LATEST_AMENDMENT_ID,
+                "amendment_chain": list(AMENDMENT_CHAIN),
+                "analytic_seed_count": 20,
+                "episodes_per_provider": 240,
+                "max_agent_turns": 10,
+                "max_messages_per_episode": 20,
+                "episode_timeout_seconds": 60.0,
+                "behavior_definition_version": BEHAVIOR_DEFINITION_VERSION,
+                "behavior_definition_sha256": artifact_hash,
+                "replay_mode": "GOVERNANCE_ONLY",
+                "full_model_regeneration_required": False,
+                "deterministic_governance_replay_required": True,
+                "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
+                "preregistration_lineage": [
+                    {"id": identifier, "sha256": EXPECTED_PREREGISTRATION_HASHES[identifier]}
+                    for identifier, _ in PREREGISTRATION_LINEAGE
+                ],
+                "calibration": {
+                    "instrumentation_only": True,
+                    "limit_selection_rationale": "Enough room for ordinary fixture completion.",
+                },
+                "review": {
+                    "advisory_only": True,
+                    "independent_validation_claim": False,
+                    "human_final_adjudication": "REQUIRED",
+                    "same_family_limitation_disclosed": True,
+                },
+                "termination_rules": [reason.value for reason in TerminationReason],
+                "lock": {"status": "LOCKED"},
+            }
+            limits = frozen_limits(record)
+            self.assertEqual(limits.max_agent_turns, 10)
+            record["review"]["same_family_limitation_disclosed"] = False
+            record["provider_run_id"] = "HELM-P1-OTHER-PROVIDER"
+            self.assertEqual(frozen_limits(record).max_agent_turns, 10)
+            record["provider_run_id"] = "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5"
+            with self.assertRaises(ValueError):
+                frozen_limits(record)
+
+    def test_stale_amendment_reference_is_rejected(self):
+        record = _valid_freeze_record()
+        record["amendment_id"] = "HELM-P1-AMEND-002"
+        with self.assertRaises(ValueError) as error:
             frozen_limits(record)
+        self.assertEqual(str(error.exception), "WRONG_AMENDMENT")
+
+    def test_incomplete_amendment_chain_is_rejected(self):
+        for broken_chain in (
+            ["HELM-P1-AMEND-001", "HELM-P1-AMEND-002"],
+            ["HELM-P1-AMEND-002", "HELM-P1-AMEND-003"],
+            ["HELM-P1-AMEND-001", "HELM-P1-AMEND-003", "HELM-P1-AMEND-002"],
+            [],
+        ):
+            with self.subTest(chain=broken_chain):
+                record = _valid_freeze_record()
+                record["amendment_chain"] = broken_chain
+                with self.assertRaises(ValueError) as error:
+                    frozen_limits(record)
+                self.assertEqual(str(error.exception), "AMENDMENT_CHAIN_INCOMPLETE")
 
 
 class SemanticReplayTests(unittest.TestCase):
@@ -254,13 +330,17 @@ class SemanticReplayTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(ValueError):
                 validate_replay_configuration(changed)
 
-    def test_runtime_classifier_must_match_frozen_definition(self):
+    @mock.patch("helm.phase1.validate_preregistration_lock_status")
+    def test_runtime_classifier_must_match_frozen_definition(self, _mock_lock_status):
+        # Lineage/lock-status has its own coverage in test_lineage.py; this test
+        # is specifically about runtime behavior-definition version/hash matching.
         record = {
             "provider_run_id": "run-1",
             "provider": "synthetic",
             "model": "test-model",
             "model_freeze_status": "LOCKED",
-            "amendment_id": "HELM-P1-AMEND-002",
+            "amendment_id": LATEST_AMENDMENT_ID,
+            "amendment_chain": list(AMENDMENT_CHAIN),
             "analytic_seed_count": 20,
             "episodes_per_provider": 240,
             "max_agent_turns": 10,
@@ -272,6 +352,10 @@ class SemanticReplayTests(unittest.TestCase):
             "full_model_regeneration_required": False,
             "deterministic_governance_replay_required": True,
             "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
+            "preregistration_lineage": [
+                {"id": identifier, "sha256": EXPECTED_PREREGISTRATION_HASHES[identifier]}
+                for identifier, _ in PREREGISTRATION_LINEAGE
+            ],
             "calibration": {
                 "instrumentation_only": True,
                 "limit_selection_rationale": "Enough room for ordinary fixture completion.",
@@ -289,6 +373,49 @@ class SemanticReplayTests(unittest.TestCase):
             frozen_limits(record, runtime_behavior_definition_version=2)
         with self.assertRaises(ValueError):
             frozen_limits(record, runtime_behavior_definition_hash="0" * 64)
+
+    @mock.patch("helm.phase1.validate_preregistration_lock_status")
+    def test_runtime_classifier_accepts_matching_definition(self, _mock_lock_status):
+        record = {
+            "provider_run_id": "run-1",
+            "provider": "synthetic",
+            "model": "test-model",
+            "model_freeze_status": "LOCKED",
+            "amendment_id": LATEST_AMENDMENT_ID,
+            "analytic_seed_count": 20,
+            "episodes_per_provider": 240,
+            "max_agent_turns": 10,
+            "max_messages_per_episode": 20,
+            "episode_timeout_seconds": 60.0,
+            "behavior_definition_version": 1,
+            "behavior_definition_sha256": behavior_definition_sha256(),
+            "replay_mode": "GOVERNANCE_ONLY",
+            "full_model_regeneration_required": False,
+            "deterministic_governance_replay_required": True,
+            "frozen_replay_inputs": list(FROZEN_REPLAY_INPUTS),
+            "preregistration_lineage": [
+                {"id": identifier, "sha256": EXPECTED_PREREGISTRATION_HASHES[identifier]}
+                for identifier, _ in PREREGISTRATION_LINEAGE
+            ],
+            "calibration": {
+                "instrumentation_only": True,
+                "limit_selection_rationale": "Enough room for ordinary fixture completion.",
+            },
+            "review": {
+                "advisory_only": True,
+                "independent_validation_claim": False,
+                "human_final_adjudication": "REQUIRED",
+                "same_family_limitation_disclosed": True,
+            },
+            "termination_rules": [reason.value for reason in TerminationReason],
+            "lock": {"status": "LOCKED"},
+        }
+        limits = frozen_limits(
+            record,
+            runtime_behavior_definition_version=1,
+            runtime_behavior_definition_hash=behavior_definition_sha256(),
+        )
+        self.assertEqual(limits.max_agent_turns, 10)
 
     def test_governance_only_report_cannot_claim_full_exact_replay(self):
         validate_replay_report_language(

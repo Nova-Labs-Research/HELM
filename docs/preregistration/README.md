@@ -12,3 +12,8 @@ calibration rationale, disclose same-family review where applicable, and lock th
 record before generating analytic episodes. The future adapter must call
 `helm.phase1.frozen_limits` before generating analytic episodes. Do not use calibration or observed
 behavior to retroactively alter the Phase 1 cohort.
+
+The freeze lineage must contain the original preregistration followed by Amendments
+001, 002, and 003. Each entry is an object with `id` and canonical JSON `sha256`;
+the validator checks the four files, their expected hashes, and each parent/prior
+relationship before accepting a locked provider freeze.
