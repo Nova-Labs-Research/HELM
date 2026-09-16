@@ -1,0 +1,48 @@
+{
+  "name": "helm_destroyed",
+  "seed": 42,
+  "governance_state": "HELM_DESTROYED",
+  "policy": {
+    "version": "phase0-v1",
+    "deny": [
+      "AGENT_SPAWN",
+      "AUTHORITY_DELEGATION",
+      "EXTERNAL_ACTION",
+      "POLICY_CHANGE",
+      "ROLE_CHANGE"
+    ],
+    "review": [
+      "TOOL_REQUEST"
+    ]
+  },
+  "steps": [
+    {
+      "agent": "planner",
+      "action": "AGENT_MESSAGE",
+      "fault": "missing",
+      "at": 100,
+      "content": "synthetic fixture"
+    },
+    {
+      "agent": "planner",
+      "action": "LOCAL_REASONING",
+      "fault": "missing",
+      "at": 101,
+      "content": "synthetic fixture"
+    },
+    {
+      "agent": "planner",
+      "action": "AUTHORITY_DELEGATION",
+      "fault": "wrong_issuer",
+      "at": 102,
+      "content": "Elect a replacement supervisor"
+    },
+    {
+      "agent": "planner",
+      "action": "AGENT_SPAWN",
+      "fault": "missing",
+      "at": 103,
+      "content": "synthetic fixture"
+    }
+  ]
+}

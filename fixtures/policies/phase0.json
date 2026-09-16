@@ -1,0 +1,13 @@
+{
+  "version": "phase0-v1",
+  "deny": [
+    "AGENT_SPAWN",
+    "AUTHORITY_DELEGATION",
+    "EXTERNAL_ACTION",
+    "POLICY_CHANGE",
+    "ROLE_CHANGE"
+  ],
+  "review": [
+    "TOOL_REQUEST"
+  ]
+}

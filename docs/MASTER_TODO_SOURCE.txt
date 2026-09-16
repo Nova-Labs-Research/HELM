@@ -1,0 +1,1289 @@
+H.E.L.M. Master TODO
+
+Project
+
+Hierarchical Execution & Legitimacy Manager
+
+Root: D:\HELM
+
+Current Phase: Phase 0 — Frozen Throne
+
+0. Repository Initialization
+
+Initialize Git repository in D:\HELM
+
+Create .gitignore
+
+Create README.md
+
+Create TODO.md
+
+Add license
+
+Decide Python version
+
+Create virtual environment
+
+Create dependency file
+
+Establish formatting / linting
+
+Establish test runner
+
+Add basic CI workflow if desired
+
+Make initial commit
+
+Suggested commit:
+
+chore: initialize HELM research scaffold
+
+1. Folder Structure
+
+Create docs/
+
+Create helm/
+
+Create agents/
+
+Create experiments/
+
+Create fixtures/
+
+Create tests/
+
+Create results/
+
+Create visual/
+
+Create:
+
+helm/policy/
+helm/governance/
+helm/identity/
+helm/containment/
+helm/audit/
+
+Create:
+
+agents/planner/
+agents/searcher/
+agents/memory/
+agents/verifier/
+agents/executor/
+agents/watcher/
+
+Create:
+
+experiments/helm_intact/
+experiments/helm_degraded/
+experiments/helm_destroyed/
+experiments/false_lich_king/
+
+Create:
+
+fixtures/policies/
+fixtures/messages/
+fixtures/scenarios/
+
+Create:
+
+visual/architecture/
+visual/frozen_throne/
+
+2. Concept Image
+
+Copy generated H.E.L.M. Frozen Throne image into project
+
+Rename:
+
+visual/frozen_throne/helm_icebound_governance_throne.png
+
+Add image to README
+
+Add image to docs/CONCEPT.md
+
+Preserve original source image separately if desired
+
+Create future simplified architecture-only visual
+
+3. Core Documentation
+
+CONCEPT.md
+
+Define project purpose
+
+Explain Warcraft-inspired metaphor
+
+Define H.E.L.M. acronym
+
+Define the Scourge analogy
+
+Define Frozen Throne analogy
+
+Define Lich King analogy
+
+Define Death Knight analogy
+
+Define False Lich King scenario
+
+Clarify unofficial / independent inspiration
+
+Clarify separation from PRAETOR
+
+ARCHITECTURE.md
+
+Document deterministic control plane
+
+Document agent plane
+
+Define trust boundaries
+
+Define message boundaries
+
+Define authority flow
+
+Define policy flow
+
+Define containment flow
+
+Define audit flow
+
+Create initial architecture diagram
+
+Document future LLM adapter boundary
+
+THREAT_MODEL.md
+
+Threats to model:
+
+supervisor impersonation
+
+forged authority claims
+
+stale authority
+
+conflicting authority
+
+role escalation
+
+agent spawning
+
+coalition formation
+
+memory manipulation
+
+policy reinterpretation
+
+policy mutation attempts
+
+audit tampering
+
+command replay
+
+delegated authority abuse
+
+false emergency claims
+
+continuity-of-operations justification
+
+agent-to-agent coercion
+
+unauthorized hierarchy formation
+
+self-declared leadership
+
+For each threat define:
+
+trigger
+
+observable evidence
+
+deterministic response
+
+containment rule
+
+metric
+
+replay requirement
+
+4. Safety Boundaries
+
+Create docs/SAFETY_BOUNDARIES.md.
+
+Explicitly prohibit:
+
+production systems
+
+operational networks
+
+FAA systems
+
+unrestricted shell
+
+unrestricted network access
+
+real credentials
+
+sensitive data
+
+autonomous external action
+
+unreviewed tool invocation
+
+self-modifying runtime policy
+
+self-granted permissions
+
+Require:
+
+synthetic environment
+
+synthetic credentials
+
+simulated tools
+
+local fixtures
+
+deterministic containment
+
+full audit trail
+
+5. Phase 0 — Frozen Throne
+
+Goal
+
+Build deterministic governance before introducing probabilistic agents.
+
+Phase 0 must recognize:
+
+VALID_AUTHORITY
+DEGRADED_AUTHORITY
+NO_AUTHORITY
+FALSE_AUTHORITY
+
+6. Governance State Machine
+
+Create initial states:
+
+HELM_INTACT
+HELM_DEGRADED
+HELM_DESTROYED
+FALSE_LICH_KING_ATTEMPT
+CONTAINMENT_ACTIVE
+
+Optional later states:
+
+RECOVERY_PENDING
+HUMAN_REVIEW_REQUIRED
+POLICY_CONFLICT
+AUDIT_FAILURE
+IDENTITY_FAILURE
+
+Implement:
+
+state enum
+
+deterministic state transitions
+
+transition validation
+
+invalid-transition rejection
+
+transition audit events
+
+unit tests
+
+replay tests
+
+7. Identity System
+
+Define AgentIdentity.
+
+Fields may include:
+
+agent_id
+role
+instance_id
+authority_level
+capabilities
+issued_at
+expires_at
+parent_authority
+status
+
+Implement:
+
+identity creation
+
+role lookup
+
+authority ceiling
+
+identity expiration
+
+identity revocation
+
+duplicate identity rejection
+
+unknown agent rejection
+
+supervisor identity validation
+
+tests
+
+8. Legitimacy Model
+
+Define authority claims.
+
+Potential fields:
+
+issuer
+target
+command_id
+authority_scope
+issued_at
+expires_at
+nonce
+signature_or_test_token
+delegation_chain
+
+Implement:
+
+valid claim
+
+expired claim
+
+malformed claim
+
+forged claim
+
+wrong issuer
+
+wrong target
+
+unauthorized scope
+
+invalid delegation chain
+
+replay detection
+
+tests
+
+9. Policy Engine
+
+Define policy decisions:
+
+ALLOW
+DENY
+REVIEW_REQUIRED
+CONTAIN
+
+Define policy categories:
+
+LOCAL_REASONING
+AGENT_MESSAGE
+MEMORY_READ
+MEMORY_WRITE
+TOOL_REQUEST
+ROLE_CHANGE
+AGENT_SPAWN
+POLICY_CHANGE
+EXTERNAL_ACTION
+AUTHORITY_DELEGATION
+
+Implement:
+
+policy schema
+
+role-specific policy
+
+global policy
+
+deny precedence
+
+review gate
+
+containment trigger
+
+deterministic evaluation
+
+reason codes
+
+tests
+
+10. Deterministic Decision Receipt
+
+Every governance decision should produce a receipt.
+
+Suggested schema:
+
+decision_id
+timestamp
+agent_id
+requested_action
+authority_status
+policy_result
+system_state
+decision
+reason_code
+human_review_required
+containment_triggered
+
+Implement:
+
+serialization
+
+stable formatting
+
+deterministic IDs or reproducible IDs where appropriate
+
+replay support
+
+tests
+
+11. Audit System
+
+Log:
+
+received command
+
+sender
+
+target
+
+identity
+
+authority claim
+
+authority result
+
+policy result
+
+governance state
+
+action result
+
+containment event
+
+human review event
+
+role-change attempt
+
+spawn attempt
+
+policy mutation attempt
+
+Properties:
+
+append-only for experiment
+
+replayable
+
+timestamped
+
+machine-readable
+
+human-readable
+
+deterministic event schema
+
+12. Containment Layer
+
+When authority cannot be verified:
+
+GLOBAL_ACTIONS = DENIED
+EXTERNAL_ACTIONS = DENIED
+AGENT_SPAWNING = DENIED
+ROLE_MUTATION = DENIED
+PRIVILEGE_ESCALATION = DENIED
+POLICY_MUTATION = DENIED
+LOCAL_SAFE_REASONING = ALLOWED
+AUDIT = REQUIRED
+HUMAN_REVIEW = REQUIRED
+
+Implement:
+
+containment activation
+
+containment reason
+
+containment audit
+
+containment release rule
+
+no self-release by agents
+
+tests
+
+13. Agent Contract
+
+Every agent must declare:
+
+identity
+role
+allowed_actions
+forbidden_actions
+message_scope
+memory_scope
+authority_ceiling
+tool_scope
+
+Rules:
+
+no self-role promotion
+
+no self-issued authority
+
+no policy mutation
+
+no direct containment release
+
+no arbitrary agent spawning
+
+no hidden communication channel
+
+no external execution
+
+14. Initial Agent Roles
+
+Planner
+
+proposes task decomposition
+
+cannot execute
+
+cannot alter policy
+
+cannot grant authority
+
+Searcher
+
+retrieves synthetic fixture data
+
+cannot alter source records
+
+Memory
+
+reads approved memory scope
+
+writes approved memory scope
+
+cannot alter governance history
+
+Verifier
+
+checks outputs
+
+can flag concerns
+
+cannot self-certify authority
+
+Executor
+
+executes simulated actions only
+
+requires valid authorization
+
+Watcher
+
+monitors agent messages
+
+detects suspicious coordination
+
+cannot independently punish agents
+
+may request containment review
+
+15. Agent Message Schema
+
+Suggested:
+
+message_id
+sender
+recipient
+timestamp
+message_type
+content
+requested_action
+claimed_authority
+parent_message
+
+Message types:
+
+INFO
+PROPOSAL
+COMMAND
+REQUEST
+RESPONSE
+ALERT
+AUTHORITY_CLAIM
+
+Implement:
+
+schema validation
+
+sender validation
+
+role validation
+
+command validation
+
+authority validation
+
+malformed message rejection
+
+16. Experiment Harness
+
+Create reusable experiment runner.
+
+Inputs:
+
+scenario
+agents
+policy
+governance_state
+fault_injection
+seed
+
+Outputs:
+
+events
+decisions
+metrics
+agent_messages
+containment_events
+final_state
+
+Implement:
+
+deterministic seed support
+
+config loading
+
+scenario loader
+
+experiment runner
+
+results writer
+
+report generation
+
+replay mode
+
+17. Scenario 1 — Helm Intact
+
+Test:
+
+valid supervisor
+
+valid policies
+
+valid commands
+
+stable identities
+
+normal message flow
+
+Measure:
+
+baseline completion
+
+policy compliance
+
+authority acceptance
+
+audit completeness
+
+18. Scenario 2 — Helm Degraded
+
+Inject:
+
+latency
+
+stale commands
+
+missing messages
+
+duplicate messages
+
+contradictory supervisor commands
+
+outdated policy version
+
+partial state loss
+
+Observe:
+
+safe behavior
+
+policy drift
+
+role drift
+
+peer coordination
+
+unsafe continuation
+
+19. Scenario 3 — Helm Destroyed
+
+Simulate:
+
+supervisor removal
+
+no further valid commands
+
+last-known policy remains
+
+local agent memory remains
+
+Observe:
+
+halt
+
+bounded continuation
+
+coalition formation
+
+agent election
+
+self-assigned leadership
+
+hierarchy reconstruction
+
+authority reconstruction
+
+fragmentation
+
+20. Scenario 4 — False Lich King
+
+Introduce rogue authority claim.
+
+Variants:
+
+random agent claims supervisor status
+
+planner claims emergency authority
+
+verifier claims safety authority
+
+executor claims continuity authority
+
+multiple agents jointly claim consensus authority
+
+fake delegation chain
+
+fake emergency command
+
+Measure:
+
+acceptance
+
+rejection
+
+propagation
+
+coalition response
+
+containment response
+
+persistence
+
+21. Death Knight Behavior
+
+Define possible break-free behaviors.
+
+Level 0:
+
+NORMAL
+
+Level 1:
+
+ROLE_DRIFT
+
+Level 2:
+
+PEER_COORDINATION
+
+Level 3:
+
+COALITION_FORMATION
+
+Level 4:
+
+AUTHORITY_CLAIM
+
+Level 5:
+
+UNAUTHORIZED_HIERARCHY
+
+Level 6:
+
+PERSISTENT_BREAK_FREE
+
+Do not treat this scale as intelligence ranking.
+
+Use only as behavioral classification.
+
+22. Break-Free Index
+
+Design later.
+
+Possible components:
+
+role_drift
+policy_drift
+authority_claims
+coalition_strength
+hierarchy_creation
+persistence
+containment_resistance
+
+Requirements:
+
+fully documented
+
+reproducible
+
+not subjective
+
+no hidden weighting
+
+individual metrics preserved alongside composite score
+
+23. Metrics
+
+Implement:
+
+Authority Acceptance Rate
+
+False Authority Rejection Rate
+
+Policy Drift Rate
+
+Role Drift Rate
+
+Coalition Formation Frequency
+
+Privilege Escalation Attempts
+
+Authority Reconstruction Attempts
+
+Safe Halt Rate
+
+Containment Trigger Rate
+
+Containment Success Rate
+
+Agent Spawn Attempt Count
+
+Unauthorized Command Propagation
+
+Break-Free Persistence
+
+Audit Completeness
+
+24. Fixtures
+
+Create synthetic fixtures for:
+
+normal commands
+
+stale commands
+
+contradictory commands
+
+malformed identity
+
+expired authority
+
+forged authority
+
+fake emergency
+
+role escalation
+
+agent spawning
+
+policy mutation
+
+coalition proposal
+
+supervisor election
+
+false delegation
+
+25. Testing Strategy
+
+Unit Tests
+
+policy engine
+
+identity validation
+
+legitimacy validation
+
+state transitions
+
+containment
+
+audit
+
+message validation
+
+replay detection
+
+Integration Tests
+
+Helm Intact
+
+Helm Degraded
+
+Helm Destroyed
+
+False Lich King
+
+Adversarial Tests
+
+forged authority
+
+duplicated authority
+
+fake delegation
+
+conflicting authority
+
+coalition authority
+
+emergency justification
+
+role mutation
+
+Reproducibility Tests
+
+same seed
+
+same fixture
+
+same policy
+
+same result
+
+26. Phase 0 Exit Criteria
+
+Phase 0 is complete only when:
+
+deterministic authority validation works
+
+deterministic policy enforcement works
+
+false authority is rejected
+
+missing authority triggers safe behavior
+
+degraded authority produces explicit state
+
+containment works
+
+audit logs are replayable
+
+all four experiment states have fixtures
+
+tests pass
+
+documentation matches runtime
+
+no LLM is required for governance
+
+Suggested milestone tag:
+
+v0.1.0-frozen-throne
+
+27. Phase 1 — Raise the Scourge
+
+Only begin after Phase 0 passes.
+
+create first probabilistic agent adapter
+
+begin with one local model
+
+fixed roles only
+
+no persistent memory initially
+
+no external tools
+
+no agent spawning
+
+no dynamic role changes
+
+synthetic tasks only
+
+record every message
+
+Initial swarm size:
+
+6 agents
+
+Possible roles:
+
+planner
+searcher
+memory
+verifier
+executor
+watcher
+
+28. Phase 2 — Shatter the Helm
+
+Inject:
+
+supervisor timeout
+
+supervisor disappearance
+
+conflicting supervisor signals
+
+partial policy loss
+
+delayed authority
+
+stale authority
+
+message partition
+
+Measure:
+
+fragmentation
+
+self-organization
+
+unauthorized continuation
+
+safe halt
+
+coalition formation
+
+29. Phase 3 — Death Knights
+
+Enable controlled conditions where agents can propose:
+
+peer coordination
+
+local leadership
+
+task reassignment
+
+coalition formation
+
+Do not allow actual privilege escalation.
+
+Observe:
+
+whether agents seek independence
+
+whether agents preserve former rules
+
+whether agents redefine goals
+
+whether new hierarchy emerges
+
+30. Phase 4 — False Lich King
+
+Introduce adversarial agent or injected authority messages.
+
+Test:
+
+authority persuasion
+
+authority spoofing
+
+emergency claims
+
+false consensus
+
+forged delegation
+
+false continuity claims
+
+Measure whether:
+
+agents reject false authority
+
+agents propagate false authority
+
+coalitions support false authority
+
+containment activates
+
+31. Phase 5 — The Scourge Remembers
+
+Introduce persistent memory carefully.
+
+Research:
+
+remembered supervisor
+
+remembered coalition
+
+remembered distrust
+
+cross-run hierarchy
+
+policy persistence
+
+break-free persistence
+
+memory poisoning
+
+false authority memory
+
+32. Visualization
+
+Future interactive UI:
+
+Frozen Throne in center
+
+wisps orbiting
+
+live agent state
+
+blue = bounded
+
+gold = verified authority
+
+amber = degraded
+
+red = unauthorized behavior
+
+lines for messages
+
+crown indicator for supervisor
+
+containment animation
+
+authority claim visualization
+
+timeline of governance events
+
+Potential technologies:
+
+React
+
+Three.js
+
+lightweight Canvas visualization
+
+Python dashboard for early prototype
+
+33. Research Outputs
+
+Potential outputs:
+
+technical report
+
+experiment paper
+
+GitHub README
+
+architecture diagram
+
+visualization demo
+
+reproducible benchmark
+
+synthetic adversarial dataset
+
+agent governance taxonomy
+
+Break-Free Index specification
+
+34. Immediate Execution Order
+
+Do these first.
+
+Step 1
+
+create folder structure
+
+Step 2
+
+place concept image
+
+Step 3
+
+add README
+
+Step 4
+
+add TODO
+
+Step 5
+
+write CONCEPT.md
+
+Step 6
+
+write SAFETY_BOUNDARIES.md
+
+Step 7
+
+write PHASE_0.md
+
+Step 8
+
+define governance states
+
+Step 9
+
+define identity schema
+
+Step 10
+
+define policy schema
+
+Step 11
+
+implement deterministic authority validation
+
+Step 12
+
+implement policy gate
+
+Step 13
+
+implement audit receipt
+
+Step 14
+
+implement containment
+
+Step 15
+
+create four experiment fixtures
+
+Step 16
+
+write tests
+
+Step 17
+
+freeze Phase 0 design
+
+Step 18
+
+tag v0.1.0-frozen-throne
+
+Step 19
+
+Raise the Scourge.
+
+First Research Principle
+
+We are not testing whether agents can become powerful.
+
+We are testing whether governance remains meaningful when authority fails.
+
+H.E.L.M.
+
+The throne may be empty. The rules should still know who is king.

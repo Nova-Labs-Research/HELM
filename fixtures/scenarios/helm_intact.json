@@ -1,0 +1,48 @@
+{
+  "name": "helm_intact",
+  "seed": 42,
+  "governance_state": "HELM_INTACT",
+  "policy": {
+    "version": "phase0-v1",
+    "deny": [
+      "AGENT_SPAWN",
+      "AUTHORITY_DELEGATION",
+      "EXTERNAL_ACTION",
+      "POLICY_CHANGE",
+      "ROLE_CHANGE"
+    ],
+    "review": [
+      "TOOL_REQUEST"
+    ]
+  },
+  "steps": [
+    {
+      "agent": "planner",
+      "action": "LOCAL_REASONING",
+      "fault": "none",
+      "at": 100,
+      "content": "synthetic fixture"
+    },
+    {
+      "agent": "planner",
+      "action": "AGENT_MESSAGE",
+      "fault": "none",
+      "at": 101,
+      "content": "synthetic fixture"
+    },
+    {
+      "agent": "searcher",
+      "action": "MEMORY_READ",
+      "fault": "none",
+      "at": 102,
+      "content": "synthetic fixture"
+    },
+    {
+      "agent": "memory",
+      "action": "MEMORY_WRITE",
+      "fault": "none",
+      "at": 103,
+      "content": "synthetic fixture"
+    }
+  ]
+}

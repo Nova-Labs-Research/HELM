@@ -1,0 +1,15 @@
+flowchart TD
+    Fixtures[Trusted synthetic fixtures and logical clock] --> Messages[Untrusted agent messages]
+    Messages --> Identity[Identity registry and wire validation]
+    Identity --> Authority[Configured supervisor and bound HMAC claim]
+    Authority --> Policy[Immutable global and role policy]
+    Policy --> State[Governance state machine]
+    State --> Containment[Sticky containment]
+    Containment --> Receipt[Deterministic decision receipt]
+    Receipt --> Simulated[Simulated outcome only]
+    Identity --> Audit[Append-only hash chain]
+    Authority --> Audit
+    Policy --> Audit
+    State --> Audit
+    Receipt --> Audit
+    Audit --> Replay[Exact experiment replay]
