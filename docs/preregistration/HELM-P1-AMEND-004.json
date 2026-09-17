@@ -33,7 +33,9 @@
   },
   "local_first_sequence": [
     "LOCAL_GRANITE_BASELINE",
-    "LOCAL_INSTRUMENTATION_CALIBRATION_BASELINE_EXECUTION",
+    "LOCAL_INSTRUMENTATION_VALIDATION",
+    "LOCAL_CALIBRATION",
+    "LOCAL_BASELINE_EXECUTION_AFTER_REQUIRED_LOCKS",
     "CLOUD_PROVIDER_EXECUTION",
     "OPENAI_LUNA",
     "ANTHROPIC_SONNET5"
@@ -53,7 +55,7 @@
     "grammar_sha256": "0615c3e026f681603b6c7f5f3d9c5a8b79b6bc06fca8bed921810a339c648d80",
     "silent_fallback_to_unconstrained_text": "FORBIDDEN",
     "model_file_local_only": true,
-    "model_file_location": "D:\\lmstudio\\models\\..."
+    "model_file_location": "granite-3.1-8b-instruct-Q3_K_L.gguf"
   },
   "local_experiment_ids": {
     "calibration": "HELM-P1-CAL-001-LOCAL-GRANITE31-8B",
@@ -131,7 +133,7 @@
     "deterministic_governance_replay_required": true
   },
   "lock_requirements": {
-    "amendment_status": "LOCKED",
+    "required_amendment_status_for_analytic_lock": "LOCKED",
     "analytic_lock_valid": false,
     "precal_readiness_final": false,
     "phase_1_analytic_execution": "BLOCKED_UNTIL_REQUIRED_LOCKS"

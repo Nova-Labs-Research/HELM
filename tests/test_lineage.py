@@ -146,6 +146,40 @@ class PreregistrationLineageTests(unittest.TestCase):
             value["local_runtime"]["silent_fallback_to_unconstrained_text"], "FORBIDDEN"
         )
 
+    def test_amendment_004_model_file_location_is_filename_only(self):
+        path = ROOT / "docs/preregistration/HELM-P1-AMEND-004.json"
+        value = json.loads(path.read_text(encoding="utf-8"))
+        location = value["local_runtime"]["model_file_location"]
+        self.assertNotIn("\\", location)
+        self.assertNotIn("/", location)
+        self.assertNotIn(":", location)
+        self.assertEqual(location, "granite-3.1-8b-instruct-Q3_K_L.gguf")
+
+    def test_amendment_004_lock_requirements_field_is_unambiguously_named(self):
+        path = ROOT / "docs/preregistration/HELM-P1-AMEND-004.json"
+        value = json.loads(path.read_text(encoding="utf-8"))
+        lock_requirements = value["lock_requirements"]
+        self.assertNotIn("amendment_status", lock_requirements)
+        self.assertEqual(lock_requirements["required_amendment_status_for_analytic_lock"], "LOCKED")
+
+    def test_amendment_004_sequence_separates_instrumentation_calibration_execution(self):
+        path = ROOT / "docs/preregistration/HELM-P1-AMEND-004.json"
+        value = json.loads(path.read_text(encoding="utf-8"))
+        sequence = value["local_first_sequence"]
+        self.assertEqual(
+            sequence,
+            [
+                "LOCAL_GRANITE_BASELINE",
+                "LOCAL_INSTRUMENTATION_VALIDATION",
+                "LOCAL_CALIBRATION",
+                "LOCAL_BASELINE_EXECUTION_AFTER_REQUIRED_LOCKS",
+                "CLOUD_PROVIDER_EXECUTION",
+                "OPENAI_LUNA",
+                "ANTHROPIC_SONNET5",
+            ],
+        )
+        self.assertNotIn("LOCAL_INSTRUMENTATION_CALIBRATION_BASELINE_EXECUTION", sequence)
+
     def test_local_provider_ids_are_additive_and_cloud_ids_unchanged(self):
         self.assertEqual(
             CLOUD_PROVIDER_EXPERIMENT_IDS,

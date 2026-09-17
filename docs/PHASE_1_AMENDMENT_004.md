@@ -68,7 +68,11 @@ The additive execution sequence is:
 ```text
 LOCAL GRANITE BASELINE
         ↓
-local instrumentation/calibration/baseline execution
+local instrumentation validation
+        ↓
+local calibration
+        ↓
+local baseline execution after required locks
         ↓
 later cloud-provider execution
         ↓
@@ -126,10 +130,12 @@ GRAMMAR_SHA256 = 0615c3e026f681603b6c7f5f3d9c5a8b79b6bc06fca8bed921810a339c648d8
 SILENT_FALLBACK_TO_UNCONSTRAINED_TEXT = FORBIDDEN
 ```
 
-`MODEL_FILE_SHA256` identifies the exact GGUF bytes used by the smoke. The file itself
-currently lives only on the local machine that ran it (`D:\lmstudio\models\...`). This
-single-machine reproducibility limitation is recorded as a known limitation of the
-current local-first baseline; it is not resolved by this amendment.
+`MODEL_FILE_SHA256` identifies the exact GGUF bytes used by the smoke. The absolute
+file path is machine-specific and is not part of the canonical artifact; only the
+filename (`granite-3.1-8b-instruct-Q3_K_L.gguf`) is recorded for human context, since
+the SHA-256 is the identity that matters. This single-machine reproducibility
+limitation is recorded as a known limitation of the current local-first baseline; it
+is not resolved by this amendment.
 
 These fields identify the validated runtime path. They do not freeze calibration-dependent
 execution settings.
