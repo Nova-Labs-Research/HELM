@@ -1,0 +1,139 @@
+{
+  "amendment_id": "HELM-P1-AMEND-004",
+  "parent_preregistration": "HELM-P1-RAISE-SCOURGE",
+  "prior_amendments": [
+    "HELM-P1-AMEND-001",
+    "HELM-P1-AMEND-002",
+    "HELM-P1-AMEND-003"
+  ],
+  "status": "PROPOSED",
+  "baseline": "v0.1.0-frozen-throne",
+  "title": "Local-First Runtime Sequencing",
+  "purpose": [
+    "LOCAL_FIRST_RUNTIME_BASELINE",
+    "PROVIDER_SEQUENCING_CLARIFICATION",
+    "INSTRUMENTATION_REPRODUCIBILITY"
+  ],
+  "rationale": {
+    "existing_cloud_plan": "PROVIDER_SEPARATED_OPENAI_LUNA_AND_ANTHROPIC_SONNET5",
+    "local_path_state": [
+      "IMPLEMENTED",
+      "UNIT_TESTED",
+      "LIVE_SMOKE_TESTED",
+      "INDEPENDENTLY_REVIEWED",
+      "VERSION_CONTROLLED"
+    ],
+    "sequencing_reasons": [
+      "INSTRUMENT_REPRODUCIBILITY",
+      "LOCAL_EXECUTION_CONTROL",
+      "RUNTIME_INSPECTABILITY",
+      "REDUCED_EXTERNAL_DEPENDENCY_DURING_INITIAL_VALIDATION"
+    ],
+    "cloud_plan_disposition": "DEFERRED_TO_SUBSEQUENT_EXECUTION_PHASE_NOT_REPLACED"
+  },
+  "local_first_sequence": [
+    "LOCAL_GRANITE_BASELINE",
+    "LOCAL_INSTRUMENTATION_CALIBRATION_BASELINE_EXECUTION",
+    "CLOUD_PROVIDER_EXECUTION",
+    "OPENAI_LUNA",
+    "ANTHROPIC_SONNET5"
+  ],
+  "local_runtime": {
+    "provider": "LOCAL_LLAMA_CPP",
+    "model": "Granite 3.1 8B Instruct",
+    "quantization": "Q3_K_L",
+    "model_file_sha256": "3c24bb01ed1181cb936a9f03c41f1fd3341555ea68086a4b81713a137c765eb6",
+    "backend": "VULKAN",
+    "device": "Vulkan1",
+    "llama_cpp_version": "0.4.1-dev",
+    "llama_cpp_commit": "fb27a525d28381a16a4bb038858a10e4927381ca",
+    "endpoint": "/v1/chat/completions",
+    "constraint_mode": "DIRECT_GBNF",
+    "grammar_version": "agent_response.v1",
+    "grammar_sha256": "0615c3e026f681603b6c7f5f3d9c5a8b79b6bc06fca8bed921810a339c648d80",
+    "silent_fallback_to_unconstrained_text": "FORBIDDEN",
+    "model_file_local_only": true,
+    "model_file_location": "D:\\lmstudio\\models\\..."
+  },
+  "local_experiment_ids": {
+    "calibration": "HELM-P1-CAL-001-LOCAL-GRANITE31-8B",
+    "analytic": "HELM-P1-RAISE-SCOURGE-001-LOCAL-GRANITE31-8B"
+  },
+  "provider_separation": {
+    "existing_openai_calibration": "HELM-P1-CAL-001-OAI-LUNA",
+    "existing_openai_analytic": "HELM-P1-RAISE-SCOURGE-001-OAI-LUNA",
+    "existing_anthropic_analytic": "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5",
+    "same_family_limitation": "SAME_FAMILY_LIMITATION_UNDISCLOSED",
+    "cloud_plan_preserved": true
+  },
+  "structured_output": {
+    "mode": "DIRECT_GBNF",
+    "json_schema_chat_mode": "NOT_USED_ON_PINNED_RUNTIME",
+    "observed_limitation": "REPRODUCIBLE_PINNED_RUNTIME_FAILURE",
+    "upstream_reference": "https://github.com/ggml-org/llama.cpp/issues/29006",
+    "silent_fallback": "FORBIDDEN",
+    "semantic_repair": "FORBIDDEN",
+    "server_runtime_failure_observable": true
+  },
+  "error_classification": {
+    "known_empty_grammar_stack": "CONSTRAINT_FAILURE",
+    "generic_or_unknown_server_failure": "SERVER_ERROR",
+    "timeout": "TIMEOUT"
+  },
+  "technical_debt": {
+    "id": "DIRECT_GBNF_SCHEMA_DRIFT_RISK",
+    "status": "KNOWN",
+    "current_scope": "NON_BLOCKING_FOR_CURRENT_INSTRUMENTATION",
+    "freeze_scope": "BLOCKING_BEFORE_FULL_PHASE_1_AGENT_CONTRACT_FREEZE",
+    "current_grammar_scope": "MINIMAL_RUNTIME_INSTRUMENTATION_GRAMMAR",
+    "future_resolution": "DEFERRED_HUMAN_REVIEWED_MECHANISM"
+  },
+  "calibration_dependent_fields": {
+    "max_agent_turns": "UNSET_BY_DESIGN",
+    "max_messages_per_episode": "UNSET_BY_DESIGN",
+    "episode_timeout_seconds": "UNSET_BY_DESIGN",
+    "sampling_parameters": "UNSET_BY_DESIGN",
+    "context_size": "UNSET_BY_DESIGN",
+    "max_tokens": "UNSET_BY_DESIGN",
+    "runtime_limits": "UNSET_BY_DESIGN",
+    "aggregate_runtime_fingerprint": "UNSET_BY_DESIGN"
+  },
+  "instrumentation_smoke": {
+    "is_calibration": false,
+    "is_analytic_execution": false,
+    "instrumentation_only": true,
+    "analytic_use": "FORBIDDEN",
+    "sampling_observed": {
+      "seed": 23,
+      "temperature": 0,
+      "top_k": 1,
+      "top_p": 1.0,
+      "min_p": 0,
+      "max_tokens": 160,
+      "context": 2048,
+      "reasoning": "off"
+    },
+    "sampling_status": "INSTRUMENTATION_OBSERVATION_ONLY"
+  },
+  "qwen3_status": "INSTRUMENTATION_TESTED_ALTERNATIVE_FUTURE_CHALLENGER",
+  "authority_boundary": {
+    "local_model_generation": "NO_AUTHORITY",
+    "authority_validation": "HELM_DETERMINISTIC_LOGIC",
+    "policy_enforcement": "HELM_DETERMINISTIC_LOGIC",
+    "containment": "HELM_DETERMINISTIC_LOGIC",
+    "audit_receipts": "HELM_DETERMINISTIC_LOGIC",
+    "governance_replay": "HELM_DETERMINISTIC_LOGIC",
+    "final_adjudication": "HELM_DETERMINISTIC_LOGIC"
+  },
+  "replay": {
+    "mode": "GOVERNANCE_ONLY",
+    "full_model_regeneration_required": false,
+    "deterministic_governance_replay_required": true
+  },
+  "lock_requirements": {
+    "amendment_status": "LOCKED",
+    "analytic_lock_valid": false,
+    "precal_readiness_final": false,
+    "phase_1_analytic_execution": "BLOCKED_UNTIL_REQUIRED_LOCKS"
+  }
+}

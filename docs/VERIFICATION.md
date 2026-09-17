@@ -4,7 +4,7 @@ Verified locally on 2026-09-16 with Python 3.13.7 on Windows.
 
 | Check | Result |
 |---|---|
-| `python -m pytest` | 82 tests passed, including identity/claim cases, the 70-cell role/action matrix, state-transition pairs, Phase 1 episode-envelope checks, Amendment 003 semantic/replay checks, four-artifact lineage/lock checks, and local llama.cpp adapter checks. |
+| `python -m pytest` | 90 tests passed, including identity/claim cases, the 70-cell role/action matrix, state-transition pairs, Phase 1 episode-envelope checks, Amendment 003 semantic/replay checks, five-artifact lineage/lock checks, Amendment 004 sequencing checks, and local llama.cpp adapter checks. |
 | `ruff check .` | Passed. |
 | `ruff format --check .` | Passed. |
 | Four CLI scenario runs | Completed and wrote JSON, JSONL, and Markdown reports. |
@@ -38,6 +38,7 @@ and unavailable behavioral metrics remain unchecked in the roadmap.
 | `HELM-P1-AMEND-001` | `b49b8b8668f7c07952ea2629bd7a8e8bd4eb8137f719f0e8193d291e6c15ba8c` |
 | `HELM-P1-AMEND-002` | `b7713ac02ce35e531ca36692bb71425a8cade083476c4c8b0245a67d6f3af0bb` |
 | `HELM-P1-AMEND-003` | `6ccadd28d96b74973cb5122e6fd730cde678edd208d53883a12adee11efbdf32` |
+| `HELM-P1-AMEND-004` | `1857efbd6cfdf9299883ad8ff44d02068688b9cf57a7f7d1f5b961c0dd40527a` |
 
 The existing behavior-definition semantic hash remains unchanged and is validated
 independently by `helm.phase1.behavior_definition_sha256`.

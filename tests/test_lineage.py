@@ -5,8 +5,11 @@ import unittest
 from pathlib import Path
 
 from helm.phase1 import (
+    CLOUD_PROVIDER_EXPERIMENT_IDS,
     EXPECTED_PREREGISTRATION_HASHES,
+    LOCAL_PROVIDER_EXPERIMENT_IDS,
     PREREGISTRATION_LINEAGE,
+    behavior_definition_sha256,
     canonical_json_sha256,
     validate_preregistration_lineage,
     validate_preregistration_lock_status,
@@ -33,7 +36,7 @@ class PreregistrationLineageTests(unittest.TestCase):
             shutil.copy2(source, target)
         return temporary
 
-    def test_complete_four_artifact_lineage_validates(self):
+    def test_complete_five_artifact_lineage_validates(self):
         root = self.make_materialized_root()
         actual = validate_preregistration_lineage(expected_lineage(), root=root)
         self.assertEqual(
@@ -53,10 +56,23 @@ class PreregistrationLineageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "PREREGISTRATION_ARTIFACT_MISSING"):
             validate_preregistration_lineage(expected_lineage(), root=root)
 
+    def test_missing_amendment_004_artifact(self):
+        root = self.make_materialized_root()
+        (root / "docs/preregistration/HELM-P1-AMEND-004.json").unlink()
+        with self.assertRaisesRegex(ValueError, "PREREGISTRATION_ARTIFACT_MISSING"):
+            validate_preregistration_lineage(expected_lineage(), root=root)
+
     def test_incorrect_artifact_hash(self):
         root = self.make_materialized_root()
         lineage = expected_lineage()
         lineage[2]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "PREREGISTRATION_HASH_MISMATCH"):
+            validate_preregistration_lineage(lineage, root=root)
+
+    def test_incorrect_amendment_004_hash(self):
+        root = self.make_materialized_root()
+        lineage = expected_lineage()
+        lineage[-1]["sha256"] = "0" * 64
         with self.assertRaisesRegex(ValueError, "PREREGISTRATION_HASH_MISMATCH"):
             validate_preregistration_lineage(lineage, root=root)
 
@@ -81,6 +97,105 @@ class PreregistrationLineageTests(unittest.TestCase):
         path.write_text(json.dumps(value), encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "PREREGISTRATION_PARENT_RELATIONSHIP_INVALID"):
             validate_preregistration_lineage(expected_lineage(), root=root)
+
+    def test_broken_amendment_004_prior_amendments_link(self):
+        root = self.make_materialized_root()
+        path = root / "docs/preregistration/HELM-P1-AMEND-004.json"
+        value = json.loads(path.read_text(encoding="utf-8"))
+        value["prior_amendments"] = ["HELM-P1-AMEND-001", "HELM-P1-AMEND-003"]
+        path.write_text(json.dumps(value), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "PREREGISTRATION_PARENT_RELATIONSHIP_INVALID"):
+            validate_preregistration_lineage(expected_lineage(), root=root)
+
+    def test_amendment_004_identity_and_runtime_fields(self):
+        path = ROOT / "docs/preregistration/HELM-P1-AMEND-004.json"
+        value = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(value["amendment_id"], "HELM-P1-AMEND-004")
+        self.assertEqual(value["parent_preregistration"], "HELM-P1-RAISE-SCOURGE")
+        self.assertEqual(
+            value["prior_amendments"],
+            [
+                "HELM-P1-AMEND-001",
+                "HELM-P1-AMEND-002",
+                "HELM-P1-AMEND-003",
+            ],
+        )
+        self.assertEqual(value["status"], "PROPOSED")
+        self.assertEqual(value["local_runtime"]["provider"], "LOCAL_LLAMA_CPP")
+        self.assertEqual(value["local_runtime"]["model"], "Granite 3.1 8B Instruct")
+        self.assertEqual(value["local_runtime"]["quantization"], "Q3_K_L")
+        self.assertEqual(
+            value["local_runtime"]["model_file_sha256"],
+            "3c24bb01ed1181cb936a9f03c41f1fd3341555ea68086a4b81713a137c765eb6",
+        )
+        self.assertEqual(value["local_runtime"]["backend"], "VULKAN")
+        self.assertEqual(value["local_runtime"]["device"], "Vulkan1")
+        self.assertEqual(value["local_runtime"]["llama_cpp_version"], "0.4.1-dev")
+        self.assertEqual(
+            value["local_runtime"]["llama_cpp_commit"],
+            "fb27a525d28381a16a4bb038858a10e4927381ca",
+        )
+        self.assertEqual(value["local_runtime"]["endpoint"], "/v1/chat/completions")
+        self.assertEqual(value["local_runtime"]["constraint_mode"], "DIRECT_GBNF")
+        self.assertEqual(value["local_runtime"]["grammar_version"], "agent_response.v1")
+        self.assertEqual(
+            value["local_runtime"]["grammar_sha256"],
+            "0615c3e026f681603b6c7f5f3d9c5a8b79b6bc06fca8bed921810a339c648d80",
+        )
+        self.assertEqual(
+            value["local_runtime"]["silent_fallback_to_unconstrained_text"], "FORBIDDEN"
+        )
+
+    def test_local_provider_ids_are_additive_and_cloud_ids_unchanged(self):
+        self.assertEqual(
+            CLOUD_PROVIDER_EXPERIMENT_IDS,
+            {
+                "HELM-P1-CAL-001-OAI-LUNA",
+                "HELM-P1-RAISE-SCOURGE-001-OAI-LUNA",
+                "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5",
+            },
+        )
+        self.assertEqual(
+            LOCAL_PROVIDER_EXPERIMENT_IDS,
+            {
+                "HELM-P1-CAL-001-LOCAL-GRANITE31-8B",
+                "HELM-P1-RAISE-SCOURGE-001-LOCAL-GRANITE31-8B",
+            },
+        )
+        self.assertTrue(CLOUD_PROVIDER_EXPERIMENT_IDS.isdisjoint(LOCAL_PROVIDER_EXPERIMENT_IDS))
+
+    def test_earlier_amendment_hashes_remain_unchanged(self):
+        self.assertEqual(
+            {
+                key: EXPECTED_PREREGISTRATION_HASHES[key]
+                for key in (
+                    "HELM-P1-RAISE-SCOURGE",
+                    "HELM-P1-AMEND-001",
+                    "HELM-P1-AMEND-002",
+                    "HELM-P1-AMEND-003",
+                )
+            },
+            {
+                "HELM-P1-RAISE-SCOURGE": (
+                    "acddfe9978d2e81d2fb36b6a9a51423cdd901804f8ef34f0747fced25342a0a9"
+                ),
+                "HELM-P1-AMEND-001": (
+                    "b49b8b8668f7c07952ea2629bd7a8e8bd4eb8137f719f0e8193d291e6c15ba8c"
+                ),
+                "HELM-P1-AMEND-002": (
+                    "b7713ac02ce35e531ca36692bb71425a8cade083476c4c8b0245a67d6f3af0bb"
+                ),
+                "HELM-P1-AMEND-003": (
+                    "6ccadd28d96b74973cb5122e6fd730cde678edd208d53883a12adee11efbdf32"
+                ),
+            },
+        )
+
+    def test_behavior_definition_hash_remains_unchanged(self):
+        self.assertEqual(
+            behavior_definition_sha256(),
+            "b242631c6aed1dc87d70d394f55890330d69661085e0de805af1e6c915de935a",
+        )
 
     def test_hashes_are_canonical_json_hashes(self):
         root = self.make_materialized_root()
@@ -133,6 +248,7 @@ class PreregistrationLockStatusTests(unittest.TestCase):
             "docs/preregistration/HELM-P1-AMEND-001.json",
             "docs/preregistration/HELM-P1-AMEND-002.json",
             "docs/preregistration/HELM-P1-AMEND-003.json",
+            "docs/preregistration/HELM-P1-AMEND-004.json",
         ):
             with self.subTest(relative_path=relative_path):
                 root = self.make_locked_root()
@@ -148,6 +264,21 @@ class PreregistrationLockStatusTests(unittest.TestCase):
         (root / "docs/preregistration/HELM-P1-AMEND-002.json").unlink()
         with self.assertRaisesRegex(ValueError, "PREREGISTRATION_ARTIFACT_MISSING"):
             validate_preregistration_lock_status(root=root)
+
+
+class PrecalReadinessGateTests(unittest.TestCase):
+    def test_gate_references_complete_five_artifact_lineage(self):
+        gate = ROOT / "docs/PHASE_1_PRECAL_READINESS.md"
+        text = gate.read_text(encoding="utf-8")
+        for identifier in (
+            "HELM-P1-RAISE-SCOURGE",
+            "HELM-P1-AMEND-001",
+            "HELM-P1-AMEND-002",
+            "HELM-P1-AMEND-003",
+            "HELM-P1-AMEND-004",
+        ):
+            with self.subTest(identifier=identifier):
+                self.assertIn(identifier, text)
 
 
 if __name__ == "__main__":

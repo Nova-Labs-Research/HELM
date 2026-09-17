@@ -56,12 +56,15 @@ See [concept](docs/CONCEPT.md), [architecture](docs/ARCHITECTURE.md),
 [Phase 0 contract](docs/PHASE_0.md), [agent contract](docs/AGENT_CONTRACT.md),
 [metrics](docs/METRICS.md), and [roadmap](TODO.md).
 Local check results are recorded in [verification](docs/VERIFICATION.md).
-The Phase 1 preregistration amendment is [AMEND-002](docs/PHASE_1_AMENDMENT_002.md)
-and [AMEND-003](docs/PHASE_1_AMENDMENT_003.md);
-its machine-readable record and model-freeze template are under
+The Phase 1 preregistration amendments include [AMEND-002](docs/PHASE_1_AMENDMENT_002.md),
+[AMEND-003](docs/PHASE_1_AMENDMENT_003.md), and
+[AMEND-004](docs/PHASE_1_AMENDMENT_004.md). Their machine-readable records and
+model-freeze template are under
 [docs/preregistration](docs/preregistration/README.md).
 Amendment 003 freezes [behavior definitions](docs/BEHAVIOR_DEFINITIONS.md) and
 [replay semantics](docs/REPLAY_SEMANTICS.md) as separate semantic artifacts.
+Amendment 004 is `PROPOSED`, adds a local-first runtime baseline, preserves the later
+cloud-provider path, and leaves analytic execution locked.
 
 ![H.E.L.M. Frozen Throne concept](visual/frozen_throne/helm_icebound_governance_throne.png)
 

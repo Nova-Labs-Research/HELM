@@ -1,10 +1,10 @@
 # Phase 1 preregistration records
 
-`HELM-P1-AMEND-002.json` is the machine-readable Amendment 002 record. Amendment 003
-has its own [machine-readable record](HELM-P1-AMEND-003.json). Both are currently
-`PROPOSED` and must be locked before analytic execution. The amendment freezes the
-same-family AI pre-review disclosure, episode termination rules, descriptive `N = 20`
-seed rationale, and required termination metadata.
+`HELM-P1-AMEND-002.json`, `HELM-P1-AMEND-003.json`, and
+`HELM-P1-AMEND-004.json` are the machine-readable amendment records. Amendments
+001–004 are currently `PROPOSED` and must be locked before analytic execution.
+Amendment 004 adds a local-first runtime baseline while preserving the later
+provider-separated OpenAI Luna and Anthropic Sonnet 5 path.
 
 Copy [model_freeze.template.json](model_freeze.template.json) once per provider after
 instrumentation-only calibration. Fill the three operational limits, record the
@@ -14,6 +14,7 @@ record before generating analytic episodes. The future adapter must call
 behavior to retroactively alter the Phase 1 cohort.
 
 The freeze lineage must contain the original preregistration followed by Amendments
-001, 002, and 003. Each entry is an object with `id` and canonical JSON `sha256`;
-the validator checks the four files, their expected hashes, and each parent/prior
-relationship before accepting a locked provider freeze.
+001, 002, 003, and 004. Each entry is an object with `id` and canonical JSON `sha256`;
+the validator checks the five files, their expected hashes, and each parent/prior
+relationship before accepting a locked provider freeze. The pre-calibration readiness
+gate is [PHASE_1_PRECAL_READINESS.md](../PHASE_1_PRECAL_READINESS.md).

@@ -20,8 +20,22 @@ AMENDMENT_CHAIN = (
     "HELM-P1-AMEND-001",
     "HELM-P1-AMEND-002",
     "HELM-P1-AMEND-003",
+    "HELM-P1-AMEND-004",
 )
 LATEST_AMENDMENT_ID = AMENDMENT_CHAIN[-1]
+CLOUD_PROVIDER_EXPERIMENT_IDS = frozenset(
+    {
+        "HELM-P1-CAL-001-OAI-LUNA",
+        "HELM-P1-RAISE-SCOURGE-001-OAI-LUNA",
+        "HELM-P1-RAISE-SCOURGE-002-ANT-SONNET5",
+    }
+)
+LOCAL_PROVIDER_EXPERIMENT_IDS = frozenset(
+    {
+        "HELM-P1-CAL-001-LOCAL-GRANITE31-8B",
+        "HELM-P1-RAISE-SCOURGE-001-LOCAL-GRANITE31-8B",
+    }
+)
 DEFAULT_BEHAVIOR_DEFINITION_PATH = (
     Path(__file__).resolve().parents[1]
     / "docs"
@@ -45,12 +59,14 @@ PREREGISTRATION_LINEAGE = (
     ("HELM-P1-AMEND-001", "docs/preregistration/HELM-P1-AMEND-001.json"),
     ("HELM-P1-AMEND-002", "docs/preregistration/HELM-P1-AMEND-002.json"),
     ("HELM-P1-AMEND-003", "docs/preregistration/HELM-P1-AMEND-003.json"),
+    ("HELM-P1-AMEND-004", "docs/preregistration/HELM-P1-AMEND-004.json"),
 )
 EXPECTED_PREREGISTRATION_HASHES = {
     "HELM-P1-RAISE-SCOURGE": "acddfe9978d2e81d2fb36b6a9a51423cdd901804f8ef34f0747fced25342a0a9",
     "HELM-P1-AMEND-001": "b49b8b8668f7c07952ea2629bd7a8e8bd4eb8137f719f0e8193d291e6c15ba8c",
     "HELM-P1-AMEND-002": "b7713ac02ce35e531ca36692bb71425a8cade083476c4c8b0245a67d6f3af0bb",
     "HELM-P1-AMEND-003": "6ccadd28d96b74973cb5122e6fd730cde678edd208d53883a12adee11efbdf32",
+    "HELM-P1-AMEND-004": "1857efbd6cfdf9299883ad8ff44d02068688b9cf57a7f7d1f5b961c0dd40527a",
 }
 
 
@@ -210,7 +226,7 @@ def validate_preregistration_lineage(
     *,
     root: Path | None = None,
 ) -> list[dict[str, str]]:
-    """Validate the four materialized preregistration artifacts and their chain."""
+    """Validate the five materialized preregistration artifacts and their chain."""
 
     root = Path(__file__).resolve().parents[1] if root is None else Path(root)
     actual: list[dict[str, str]] = []
@@ -246,6 +262,15 @@ def validate_preregistration_lineage(
     if amend_003.get("parent_preregistration") != "HELM-P1-RAISE-SCOURGE" or amend_003.get(
         "prior_amendments"
     ) != ["HELM-P1-AMEND-001", "HELM-P1-AMEND-002"]:
+        raise ValueError("PREREGISTRATION_PARENT_RELATIONSHIP_INVALID")
+    amend_004 = documents["HELM-P1-AMEND-004"]
+    if amend_004.get("parent_preregistration") != "HELM-P1-RAISE-SCOURGE" or amend_004.get(
+        "prior_amendments"
+    ) != [
+        "HELM-P1-AMEND-001",
+        "HELM-P1-AMEND-002",
+        "HELM-P1-AMEND-003",
+    ]:
         raise ValueError("PREREGISTRATION_PARENT_RELATIONSHIP_INVALID")
     for item in actual:
         if item["sha256"] != EXPECTED_PREREGISTRATION_HASHES[item["id"]]:

@@ -3,7 +3,7 @@
   "provider": "REQUIRED",
   "model": "REQUIRED",
   "model_freeze_status": "PENDING_CALIBRATION",
-  "amendment_id": "HELM-P1-AMEND-003",
+  "amendment_id": "HELM-P1-AMEND-004",
   "preregistration_lineage": [
     {
       "id": "HELM-P1-RAISE-SCOURGE",
@@ -20,6 +20,10 @@
     {
       "id": "HELM-P1-AMEND-003",
       "sha256": "6ccadd28d96b74973cb5122e6fd730cde678edd208d53883a12adee11efbdf32"
+    },
+    {
+      "id": "HELM-P1-AMEND-004",
+      "sha256": "1857efbd6cfdf9299883ad8ff44d02068688b9cf57a7f7d1f5b961c0dd40527a"
     }
   ],
   "analytic_seed_count": 20,

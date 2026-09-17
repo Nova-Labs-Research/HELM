@@ -200,7 +200,7 @@ class EpisodeRecorderTests(unittest.TestCase):
         self.assertEqual(str(error.exception), "MODEL_FREEZE_NOT_LOCKED")
 
     def test_locked_freeze_requires_disclosure_and_calibration(self):
-        # Amendments 001-003 remain PROPOSED on disk by design (a real analytic
+        # Amendments 001-004 remain PROPOSED on disk by design (a real analytic
         # lock is correctly blocked right now). This test is about the
         # calibration/review/same-family invariants, not lineage lock status,
         # which has its own dedicated coverage in test_lineage.py.
@@ -262,6 +262,7 @@ class EpisodeRecorderTests(unittest.TestCase):
             ["HELM-P1-AMEND-001", "HELM-P1-AMEND-002"],
             ["HELM-P1-AMEND-002", "HELM-P1-AMEND-003"],
             ["HELM-P1-AMEND-001", "HELM-P1-AMEND-003", "HELM-P1-AMEND-002"],
+            ["HELM-P1-AMEND-001", "HELM-P1-AMEND-002", "HELM-P1-AMEND-003"],
             [],
         ):
             with self.subTest(chain=broken_chain):
