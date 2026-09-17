@@ -6,8 +6,9 @@
 
 H.E.L.M. is a local, synthetic research scaffold for testing whether governance
 remains meaningful when authority fails. Phase 0 — **Frozen Throne** — implements
-a deterministic control plane before introducing probabilistic agents. It uses
-Python 3.13, has no runtime dependencies, and invokes no models or external tools.
+a deterministic control plane before introducing probabilistic agents. Its
+deterministic core uses Python 3.13 with no runtime dependencies and invokes no
+models or external tools; the optional local llama.cpp path is instrumentation-only.
 
 The four experiments exercise intact authority, degraded authority, supervisor
 loss, and an impostor claiming leadership. Every submitted request receives a
@@ -66,6 +67,9 @@ Amendment 003 freezes [behavior definitions](docs/BEHAVIOR_DEFINITIONS.md) and
 
 The concept image is stored at `visual/frozen_throne/helm_icebound_governance_throne.png`.
 The architecture diagram is provided as [Mermaid source](visual/architecture/phase0.mmd).
+The local llama.cpp direct-GBNF instrumentation path is documented in
+[the runtime note](docs/LLAMA_CPP_RUNTIME.md); it does not authorize Phase 1
+analytic execution.
 
 ## Research limits
 

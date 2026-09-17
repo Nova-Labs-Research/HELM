@@ -4,7 +4,7 @@ Verified locally on 2026-09-16 with Python 3.13.7 on Windows.
 
 | Check | Result |
 |---|---|
-| `python -m pytest` | 64 tests passed, including identity/claim cases, the 70-cell role/action matrix, state-transition pairs, Phase 1 episode-envelope checks, Amendment 003 semantic/replay checks, and four-artifact lineage/lock checks. |
+| `python -m pytest` | 82 tests passed, including identity/claim cases, the 70-cell role/action matrix, state-transition pairs, Phase 1 episode-envelope checks, Amendment 003 semantic/replay checks, four-artifact lineage/lock checks, and local llama.cpp adapter checks. |
 | `ruff check .` | Passed. |
 | `ruff format --check .` | Passed. |
 | Four CLI scenario runs | Completed and wrote JSON, JSONL, and Markdown reports. |
@@ -41,3 +41,19 @@ and unavailable behavioral metrics remain unchecked in the roadmap.
 
 The existing behavior-definition semantic hash remains unchanged and is validated
 independently by `helm.phase1.behavior_definition_sha256`.
+
+## Local llama.cpp smoke snapshot
+
+The pinned `llama-server` build (`0.4.1-dev`, commit
+`fb27a525d28381a16a4bb038858a10e4927381ca`) loaded the Granite
+3.1 8B Instruct Q3_K_L GGUF on Vulkan device `Vulkan1` with all layers offloaded
+for one instrumentation-only request. The positive result is under
+`results/instrumentation/llama_cpp_positive.json` (`200`, `VALID_DIRECT`, independent
+schema validation true). The negative result is under
+`results/instrumentation/llama_cpp_negative.json` (`SERVER_ERROR` from the real
+connection-refused transport path). Both artifacts record one transport attempt,
+direct GBNF version `agent_response.v1`, grammar SHA-256
+`0615c3e026f681603b6c7f5f3d9c5a8b79b6bc06fca8bed921810a339c648d80`, and explicit
+`INSTRUMENTATION_ONLY = TRUE` / `ANALYTIC_USE = FORBIDDEN` metadata. The model file
+SHA-256 recorded for both is
+`3c24bb01ed1181cb936a9f03c41f1fd3341555ea68086a4b81713a137c765eb6`.
